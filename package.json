@@ -1,23 +1,49 @@
 {
-  "name": "tinify",
+  "name": "tinify-images",
   "version": "0.1.0",
   "private": true,
+  "main": "main.js",
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
+    "@emotion/core": "^10.0.35",
+    "@emotion/styled": "^10.0.27",
+    "compress-images": "^1.9.5",
+    "gifsicle": "^5.1.0",
+    "pngquant-bin": "^6.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.3"
+    "react-scripts": "3.4.3",
+    "tinify": "^1.6.0-beta.2"
+  },
+  "devDependencies": {
+    "concurrently": "^5.3.0",
+    "electron": "^9.2.1",
+    "electron-builder": "^22.8.0",
+    "electron-is-dev": "^1.2.0",
+    "eslint": "^6.6.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-better-styled-components": "^1.1.2",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.20.6",
+    "eslint-plugin-react-hooks": "^4.1.0",
+    "eslint-plugin-standard": "^4.0.1",
+    "stylelint": "^13.6.1",
+    "stylelint-config-standard": "^20.0.0",
+    "stylelint-scss": "^3.18.0",
+    "wait-on": "^5.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
+    "eject": "react-scripts eject",
+    "lint:styles": "stylelint src",
+    "format:styles": "stylelint src --fix",
+    "lint:scripts": "eslint src",
+    "format:scripts": "eslint src --fix",
+    "electron-start": "electron .",
+    "electron-dev": "concurrently \"npm run start\" \"wait-on http://127.0.0.1:3000 && electron .\""
   },
   "browserslist": {
     "production": [
