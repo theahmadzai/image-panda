@@ -30,11 +30,11 @@ module.exports = {
     }
   },
   rules: {
-    'no-console': 1,
+    'no-console': 0,
     'comma-dangle': 1,
     'react/prop-types': 0,
     'react-hooks/rules-of-hooks': 2,
     'react-hooks/exhaustive-deps': 1,
-    "better-styled-components/sort-declarations-alphabetically": 2
+    'better-styled-components/sort-declarations-alphabetically': 2
   }
 }
