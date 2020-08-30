@@ -7,6 +7,7 @@
     "@emotion/core": "^10.0.35",
     "@emotion/styled": "^10.0.27",
     "compress-images": "^1.9.5",
+    "filesize": "^6.1.0",
     "gifsicle": "^5.1.0",
     "pngquant-bin": "^6.0.0",
     "react": "^16.13.1",
