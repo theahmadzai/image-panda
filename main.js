@@ -1,25 +1,27 @@
-const { app, dialog, BrowserWindow, ipcMain } = require('electron')
+const { app, dialog, BrowserWindow, ipcMain, ipcRenderer } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const isDev = require('electron-is-dev')
+const filesize = require('filesize')
 // const compressImages = require('compress-images')
 const tinify = require('tinify')
-tinify.key = fs.readFileSync(path.join(__dirname, '.key'), 'utf-8')
+tinify.key = fs.readFileSync(path.join(__dirname, '.key'), 'utf-8').trim()
+
+let mainWindow
 
 const createWindow = () => {
-  const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    minWidth: 500,
-    minHeight: 400,
+  mainWindow = new BrowserWindow({
+    minWidth: 800,
+    minHeight: 600,
     show: false,
+    // icon: path.join(__dirname, 'public/logo.svg'),
     webPreferences: {
       nodeIntegration: true
       // preload: path.join(__dirname, 'preload.js')
     }
   })
 
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
   mainWindow.loadURL(isDev
     ? 'http://127.0.0.1:3000'
     : `file://${path.join(__dirname, 'build/index.html')}`)
@@ -55,19 +57,37 @@ ipcMain.on('images:compress', (e, outputPath, images) => {
   })
 })
 
-const compress = (images, dest) => {
-  const info = {
-    sizeBefore: 0,
-    sizeAfter: 0,
-    compressed: 0
-  }
+const compress = (filePaths = [], dest) => {
+  Array.prototype.forEach.call(filePaths, (filePath) => {
+    fs.readFile(filePath, async (err, data) => {
+      if (err) throw err
 
-  const a = tinify.fromFile(images[0])
-  a.toFile(dest + '/' + path.basename(images[0]))
-    .then(i => {
-      console.log(i)
+      const meta = {
+        originalSize: 0,
+        currentSize: 0,
+        compressionRate: 0
+      }
+
+      const imageBuffer = Buffer.from(data)
+      meta.originalSize = Buffer.byteLength(imageBuffer)
+      mainWindow.webContents.send('image:compressing', { filePath, meta })
+
+      const source = await tinify.fromBuffer(imageBuffer).result()
+      meta.currentSize = await source.size()
+      meta.compressionRate = Math.ceil(((meta.currentSize / meta.originalSize) * 100) - 100)
+
+      await source.toFile(path.resolve(dest, path.basename(filePath)))
+
+      mainWindow.webContents.send('image:compressed', { filePath, meta })
+
+      console.log('----------')
+      console.log('Before: ', filesize(meta.originalSize))
+      console.log('After: ', filesize(meta.currentSize))
+      console.log('Compression: ', meta.compressionRate + '%')
+      console.log(filePath)
+      console.log(path.resolve(dest, path.basename(filePath)))
     })
-    .catch(console.log)
+  })
 
   // compressImages(
   //   images[0].replace(/\\/g, '/'),
@@ -103,4 +123,47 @@ const compress = (images, dest) => {
   //     console.log('-------------')
   //   }
   // )
+}
+
+const inputPathOptions = {
+  filters: [
+    { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
+    { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] },
+    { name: 'Custom File Type', extensions: ['as'] },
+    { name: 'All Files', extensions: ['*'] }
+  ],
+  properties: [
+    'multiSelections'
+  ]
+}
+
+exports.getFilesFromUser = () => {
+  return dialog.showOpenDialog(mainWindow, inputPathOptions)
+    .then(({ canceled, filePaths }) => {
+      if (canceled || filePaths.length < 1) return
+
+      return filePaths
+    })
+    .catch(() => {
+      dialog.showErrorBox('Error opening files', 'Failed to open image file.')
+    })
+}
+
+const outputPathOptions = {
+  title: 'Output path',
+  properties: [
+    'openDirectory'
+  ]
+}
+
+exports.getDirectoryFromUser = () => {
+  return dialog.showOpenDialog(mainWindow, outputPathOptions)
+    .then(({ canceled, filePaths }) => {
+      if (canceled || filePaths.length < 1) return
+
+      return filePaths[0]
+    })
+    .catch(() => {
+      dialog.showErrorBox('Error selecting directory', 'Failed to select a directory.')
+    })
 }
