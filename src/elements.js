@@ -5,7 +5,7 @@ export const Stack = styled.div`
   align-items: center;
   display: flex;
   justify-content: flex-end;
-  padding: 0 16px 16px 16px;
+  margin-bottom: 16px;
 `
 
 export const Input = styled.input`
