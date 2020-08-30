@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from 'react'
-import Logo from './Logo'
-import useFilePicker from './useFilePicker'
+import React, { useState, useEffect, useCallback, Fragment } from 'react'
+import filesize from 'filesize'
+import { imageStore, imageSelect, imageStatus } from './constants'
+import FilePicker from './FilePicker'
 import TinyBar from './TinyBar'
 import styled from '@emotion/styled'
 import { Stack, Button } from './elements'
 const path = window.require('path')
-const { ipcRenderer, remote: { dialog } } = window.require('electron')
+const { ipcRenderer, remote } = window.require('electron')
+const { getFilesFromUser, getDirectoryFromUser } = remote.require('./main.js')
 
 const Pickers = styled.div`
   display: grid;
   grid-gap: 16px;
   grid-template-columns: auto auto;
-  padding: 16px;
+  margin-bottom: 16px;
 `
 
 const ImagesList = styled.div`
   background: #fff;
   color: #000;
-  height: 270px;
-  margin: 0 16px 16px 16px;
+  height: 330px;
+  margin-bottom: 16px;
   overflow: scroll;
   position: relative;
-  width: calc(100% - 32px);
+  width: 100%;
 
   div {
     align-items: center;
@@ -45,138 +47,257 @@ const ImagesList = styled.div`
   }
 `
 
-const filters = [
-  { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
-  { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] },
-  { name: 'Custom File Type', extensions: ['as'] },
-  { name: 'All Files', extensions: ['*'] }
-]
+const selectedCount = images => Array.from(images).reduce((t, image) => {
+  if (image[1].selected) return t + 1
+  return t
+}, 0)
 
-const properties = [
-  'multiSelections'
-]
+const pathsToImageObjects = paths => new Map(paths.map(path => ([path, {
+  status: imageStatus.READY,
+  selected: false,
+  meta: {
+    originalSize: 0,
+    currentSize: 0,
+    compressionRate: 0
+  }
+}])))
 
-const outputPathOptions = {
-  title: 'Output path',
-  properties: [
-    'openDirectory'
-  ]
+const imagesStoreReducer = (state, { type, payload }) => {
+  switch (type) {
+    case imageStore.ADD:
+      return new Map([...state, ...payload])
+
+    case imageStore.UPDATE:
+      return new Map(payload)
+
+    case imageStore.REMOVE_SELECTED:
+      Map.prototype.forEach.call(payload, ({ selected }, image) => {
+        if (selected) payload.delete(image)
+      })
+      return new Map(payload)
+
+    default:
+      return state
+  }
+}
+
+const imagesSelectReducer = (state, { type, payload }) => {
+  switch (type) {
+    case imageSelect.CHECK_CHANGE:
+      return new Map([...state, [payload, {
+        status: state.get(payload).status,
+        selected: !state.get(payload).selected,
+        meta: state.get(payload).meta
+      }]])
+
+    case imageSelect.CHECK_ALL:
+      Map.prototype.forEach.call(payload, image => {
+        image.selected = true
+      })
+      return new Map(payload)
+
+    case imageSelect.UNCHECK_ALL:
+      Map.prototype.forEach.call(payload, image => {
+        image.selected = false
+      })
+      return new Map(payload)
+
+    default:
+      return state
+  }
+}
+
+const imagesStatusReducer = (state, { type, payload: { key, meta } }) => {
+  switch (type) {
+    case imageStatus.COMPRESSING:
+    case imageStatus.COMPRESSED:
+    case imageStatus.FAILED:
+      return new Map([...state, [key, {
+        status: type,
+        selected: state.get(key).selected,
+        meta
+      }]])
+
+    default:
+      return state
+  }
 }
 
 const App = () => {
-  const [InputFilePicker,, setInputPath] = useFilePicker('Input Files')
-  const [OutputFilePicker, outputPath, setOutputPath] = useFilePicker(
-    'Output Directory',
-    'Select folder...'
-  )
-  const [images, setImages] = useState(new Set())
-  const [selected, setSelected] = useState(new Set())
+  const [images, setImages] = useState(new Map())
+  const [inputPath, setInputPath] = useState('')
+  const [outputPath, setOutputPath] = useState('')
+  const [apiKey, setApiKey] = useState('')
+  const [byTiny, setByTiny] = useState(false)
 
   useEffect(() => {
-    setInputPath(images.size === 1
-      ? images.values().next().value
-      : `${images.size} images selected`
-    )
+    images.size !== 0 && setInputPath(state => {
+      if (images.size === 1) return images.keys().next().value
+      else return `${images.size} images selected`
+    })
   }, [images, setInputPath])
 
-  const handleInput = () => {
-    dialog.showOpenDialog(null, { filters, properties })
-      .then(({ canceled, filePaths }) => {
-        if (canceled || filePaths.length < 1) return
+  useEffect(() => {
+    ipcRenderer.on('image:compressing', (e, { filePath, meta }) => {
+      setImages(state => imagesStatusReducer(state, {
+        type: imageStatus.COMPRESSING,
+        payload: { key: filePath, meta }
+      }))
+    })
 
-        setImages(new Set(filePaths))
-      })
-      .catch(() => {
-        dialog.showErrorBox('Error opening files', 'Failed to open image file.')
-      })
+    ipcRenderer.on('image:compressed', (e, { filePath, meta }) => {
+      setImages(state => imagesStatusReducer(state, {
+        type: imageStatus.COMPRESSED,
+        payload: { key: filePath, meta }
+      }))
+    })
+  }, [])
+
+  const handleInputPath = useCallback(async () => {
+    const filePaths = await getFilesFromUser()
+
+    filePaths && setImages(state => imagesStoreReducer(state, {
+      type: imageStore.UPDATE,
+      payload: pathsToImageObjects(filePaths)
+    }))
+  }, [])
+
+  const handleOutputPath = useCallback(async () => {
+    const directory = await getDirectoryFromUser()
+
+    directory && setOutputPath(directory)
+  }, [])
+
+  const handleApiKey = useCallback((e) => {
+    setApiKey(e.target.value)
+  }, [])
+
+  const handleByTiny = useCallback(() => {
+    setByTiny(state => !state)
+  }, [])
+
+  const handleAddMore = async () => {
+    const filePaths = await getFilesFromUser()
+
+    filePaths && setImages(state => imagesStoreReducer(state, {
+      type: imageStore.ADD,
+      payload: pathsToImageObjects(filePaths)
+    }))
   }
 
-  const handleAddMore = () => {
-    dialog.showOpenDialog(null, { filters, properties })
-      .then(({ canceled, filePaths }) => {
-        if (canceled || filePaths.length < 1) return
-
-        setImages(new Set([...filePaths, ...images]))
-      })
-      .catch(() => {
-        dialog.showErrorBox('Error opening files', 'Failed to open image file.')
-      })
+  const handleCheckChange = (key) => {
+    setImages(state => imagesSelectReducer(state, {
+      type: imageSelect.CHECK_CHANGE,
+      payload: key
+    }))
   }
 
-  const handleOutput = () => {
-    dialog.showOpenDialog(outputPathOptions)
-      .then(({ canceled, filePaths }) => {
-        if (canceled || filePaths.length < 1) return
+  const handleCheckChangeAll = (e) => {
+    const type = e.target.checked
+      ? imageSelect.CHECK_ALL
+      : imageSelect.UNCHECK_ALL
 
-        setOutputPath(filePaths[0])
-      })
-  }
-
-  const handleSelectAll = () => {
-    if (selected.size === images.size) setSelected(new Set())
-    else setSelected(new Set(images))
-  }
-
-  const handleCheckChange = (i) => {
-    if (selected.has(i)) selected.delete(i)
-    else selected.add(i)
-
-    setSelected(new Set(selected))
+    setImages(state => imagesSelectReducer(state, {
+      type,
+      payload: state
+    }))
   }
 
   const handleRemoveSlected = () => {
-    selected.forEach(image => {
-      images.delete(image)
-      selected.delete(image)
-    })
-
-    setImages(new Set(images))
-    setSelected(new Set(selected))
+    setImages(state => imagesStoreReducer(state, {
+      type: imageStore.REMOVE_SELECTED,
+      payload: state
+    }))
   }
 
   const handleCompress = () => {
-    ipcRenderer.send('images:compress', outputPath, Array.from(images))
+    const filePaths = Array.from(images)
+      .filter(([, { status }]) => status !== imageStatus.COMPRESSED)
+      .map(([key]) => key)
+
+    ipcRenderer.send('images:compress', outputPath, filePaths)
+  }
+
+  const rowByStatus = (status, meta) => {
+    if (status === imageStatus.READY) {
+      return (
+        <div>READY</div>
+      )
+    }
+
+    if (status === imageStatus.COMPRESSING) {
+      return (
+        <Fragment>
+          <div>{filesize(meta.originalSize)}</div>
+          <div>COMPRESSING</div>
+        </Fragment>
+      )
+    }
+
+    if (status === imageStatus.COMPRESSED) {
+      return (
+        <Fragment>
+          <div>{filesize(meta.originalSize)}</div>
+          <div>{filesize(meta.currentSize)}</div>
+          <div>{meta.compressionRate}%</div>
+        </Fragment>
+      )
+    }
+
+    if (status === imageStatus.FAILED) {
+      return (
+        <div>FAILED</div>
+      )
+    }
+    return (
+      <div>IN PROGRESS...</div>
+    )
   }
 
   return (
     <div className="App">
-      <Logo />
       <Pickers>
-        <InputFilePicker onClick={handleInput} />
-        <OutputFilePicker onClick={handleOutput} />
+        <FilePicker
+          label='Input Files'
+          placeholder='No images selected'
+          value={inputPath}
+          onClick={handleInputPath} />
+        <FilePicker
+          label='Output Directory'
+          placeholder='Select folder...'
+          value={outputPath}
+          onClick={handleOutputPath} />
       </Pickers>
-      <TinyBar />
+      <TinyBar {...{ apiKey, handleApiKey, byTiny, handleByTiny }} />
       <ImagesList>
         <div>
           <div>
             <input
               type="checkbox"
-              checked={images.size === selected.size && images.size !== 0}
-              onChange={handleSelectAll} />
+              checked={images.size === selectedCount(images) && images.size !== 0}
+              onChange={handleCheckChangeAll} />
           </div>
           <div>Filename</div>
           <div>Original Size</div>
           <div>Current Size</div>
           <div>Compressed</div>
         </div>
-        {Array.from(images).map((image, i) => (
-          <div key={i}>
+        {Array.from(images).map(([key, { status, selected, meta }]) => (
+          <div key={key}>
             <div>
               <input
                 type="checkbox"
-                checked={selected.has(image)}
-                onChange={handleCheckChange.bind(this, image)} />
+                checked={selected}
+                onChange={handleCheckChange.bind(null, key)} />
             </div>
-            <div>{path.basename(image)}</div>
-            <div>56.2KB</div>
-            <div>20.0KB</div>
-            <div>-30%</div>
+            <div>{path.basename(key)}</div>
+            {rowByStatus(status, meta)}
           </div>
         ))}
       </ImagesList>
       <Stack>
-        <Button onClick={handleRemoveSlected}>Remove selected</Button>
         <Button onClick={handleAddMore}>Add more</Button>
+        <Button onClick={handleRemoveSlected}>Remove selected</Button>
         <Button onClick={handleCompress}>Compress images</Button>
       </Stack>
     </div>
