@@ -12,16 +12,24 @@ const Checkbox = styled.div`
   padding: 0 8px;
 `
 
-const TinyBar = () => {
+const TinyBar = ({ apiKey, handleApiKey, byTiny, handleByTiny }) => {
   return (
     <Stack>
-      <Input type="text" placeholder="Enter API Key here" />
+      <Input
+        type="text"
+        value={apiKey}
+        onChange={handleApiKey}
+        disabled={!byTiny}
+        placeholder="Enter API Key here" />
       <Checkbox>
         <label>TinyPNG</label>
-        <input type="checkbox" value="TinyPNG" />
+        <input
+          type="checkbox"
+          checked={byTiny}
+          onChange={handleByTiny} />
       </Checkbox>
     </Stack>
   )
 }
 
-export default TinyBar
+export default React.memo(TinyBar)
