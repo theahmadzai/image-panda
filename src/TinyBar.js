@@ -20,7 +20,7 @@ const TinyBar = ({ apiKey, handleApiKey, byTiny, handleByTiny }) => {
         value={apiKey}
         onChange={handleApiKey}
         disabled={!byTiny}
-        placeholder="Enter API Key here" />
+        placeholder="Enter your API Key here" />
       <Checkbox>
         <label>TinyPNG</label>
         <input
