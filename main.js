@@ -1,11 +1,9 @@
-const { app, dialog, BrowserWindow, ipcMain, ipcRenderer } = require('electron')
+const { app, dialog, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const isDev = require('electron-is-dev')
-const filesize = require('filesize')
+const FilePool = require('./electron/FilePool')
 // const compressImages = require('compress-images')
-const tinify = require('tinify')
-tinify.key = fs.readFileSync(path.join(__dirname, '.key'), 'utf-8').trim()
 
 let mainWindow
 
@@ -16,8 +14,8 @@ const createWindow = () => {
     show: false,
     // icon: path.join(__dirname, 'public/logo.svg'),
     webPreferences: {
-      nodeIntegration: true
-      // preload: path.join(__dirname, 'preload.js')
+      nodeIntegration: true,
+      preload: path.resolve(__dirname, 'electron/preload.js')
     }
   })
 
@@ -41,8 +39,8 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-ipcMain.on('images:compress', (e, outputPath, images) => {
-  if (images.length <= 0) {
+ipcMain.on('COMPRESS', (e, tinify, apiKey, filePaths, outputPath) => {
+  if (filePaths.length <= 0) {
     dialog.showErrorBox('No files selected', 'You must select files first.')
     return
   }
@@ -53,42 +51,23 @@ ipcMain.on('images:compress', (e, outputPath, images) => {
       return
     }
 
-    compress(images, outputPath)
+    compress(tinify, apiKey, filePaths, outputPath)
   })
 })
 
-const compress = (filePaths = [], dest) => {
-  Array.prototype.forEach.call(filePaths, (filePath) => {
-    fs.readFile(filePath, async (err, data) => {
-      if (err) throw err
-
-      const meta = {
-        originalSize: 0,
-        currentSize: 0,
-        compressionRate: 0
+const compress = (tinify, apiKey, filePaths = [], dest) => {
+  if (tinify) {
+    fs.writeFile(path.join(__dirname, '.key'), apiKey.toString(), 'utf-8', (err) => {
+      if (err) {
+        // ignore
       }
-
-      const imageBuffer = Buffer.from(data)
-      meta.originalSize = Buffer.byteLength(imageBuffer)
-      mainWindow.webContents.send('image:compressing', { filePath, meta })
-
-      const source = await tinify.fromBuffer(imageBuffer).result()
-      meta.currentSize = await source.size()
-      meta.compressionRate = Math.ceil(((meta.currentSize / meta.originalSize) * 100) - 100)
-
-      await source.toFile(path.resolve(dest, path.basename(filePath)))
-
-      mainWindow.webContents.send('image:compressed', { filePath, meta })
-
-      console.log('----------')
-      console.log('Before: ', filesize(meta.originalSize))
-      console.log('After: ', filesize(meta.currentSize))
-      console.log('Compression: ', meta.compressionRate + '%')
-      console.log(filePath)
-      console.log(path.resolve(dest, path.basename(filePath)))
     })
-  })
 
+    new FilePool(mainWindow, apiKey, filePaths, dest).compress()
+    return
+  }
+
+  console.log('OFFLINE COMPRESS')
   // compressImages(
   //   images[0].replace(/\\/g, '/'),
   //   dest.replace(/\\/g, '/') + '/',
@@ -123,47 +102,4 @@ const compress = (filePaths = [], dest) => {
   //     console.log('-------------')
   //   }
   // )
-}
-
-const inputPathOptions = {
-  filters: [
-    { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
-    { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] },
-    { name: 'Custom File Type', extensions: ['as'] },
-    { name: 'All Files', extensions: ['*'] }
-  ],
-  properties: [
-    'multiSelections'
-  ]
-}
-
-exports.getFilesFromUser = () => {
-  return dialog.showOpenDialog(mainWindow, inputPathOptions)
-    .then(({ canceled, filePaths }) => {
-      if (canceled || filePaths.length < 1) return
-
-      return filePaths
-    })
-    .catch(() => {
-      dialog.showErrorBox('Error opening files', 'Failed to open image file.')
-    })
-}
-
-const outputPathOptions = {
-  title: 'Output path',
-  properties: [
-    'openDirectory'
-  ]
-}
-
-exports.getDirectoryFromUser = () => {
-  return dialog.showOpenDialog(mainWindow, outputPathOptions)
-    .then(({ canceled, filePaths }) => {
-      if (canceled || filePaths.length < 1) return
-
-      return filePaths[0]
-    })
-    .catch(() => {
-      dialog.showErrorBox('Error selecting directory', 'Failed to select a directory.')
-    })
 }
