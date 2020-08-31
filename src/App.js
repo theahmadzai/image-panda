@@ -6,8 +6,8 @@ import TinyBar from './TinyBar'
 import styled from '@emotion/styled'
 import { Stack, Button } from './elements'
 const path = window.require('path')
-const { ipcRenderer, remote } = window.require('electron')
-const { getFilesFromUser, getDirectoryFromUser } = remote.require('./main.js')
+const { ipcRenderer, remote, shell } = window.require('electron')
+const { getFilesFromUser, getDirectoryFromUser } = remote.require('./electron/FilesDialogs.js')
 
 const Pickers = styled.div`
   display: grid;
@@ -19,7 +19,7 @@ const Pickers = styled.div`
 const ImagesList = styled.div`
   background: #fff;
   color: #000;
-  height: 330px;
+  height: 350px;
   margin-bottom: 16px;
   overflow: scroll;
   position: relative;
@@ -55,11 +55,7 @@ const selectedCount = images => Array.from(images).reduce((t, image) => {
 const pathsToImageObjects = paths => new Map(paths.map(path => ([path, {
   status: imageStatus.READY,
   selected: false,
-  meta: {
-    originalSize: 0,
-    currentSize: 0,
-    compressionRate: 0
-  }
+  meta: {}
 }])))
 
 const imagesStoreReducer = (state, { type, payload }) => {
@@ -107,8 +103,14 @@ const imagesSelectReducer = (state, { type, payload }) => {
   }
 }
 
-const imagesStatusReducer = (state, { type, payload: { key, meta } }) => {
+const imagesStatusReducer = (state = new Map(), { type, payload }) => {
+  const key = payload.filePath
+  const meta = { ...payload }
+  delete meta.filePath
+
   switch (type) {
+    case imageStatus.STARTED:
+    case imageStatus.UPLOADING:
     case imageStatus.COMPRESSING:
     case imageStatus.COMPRESSED:
     case imageStatus.FAILED:
@@ -128,28 +130,40 @@ const App = () => {
   const [inputPath, setInputPath] = useState('')
   const [outputPath, setOutputPath] = useState('')
   const [apiKey, setApiKey] = useState('')
-  const [byTiny, setByTiny] = useState(false)
+  const [tinify, setTinify] = useState(false)
+  const [compressionCount, setCompressionCount] = useState(null)
 
   useEffect(() => {
-    images.size !== 0 && setInputPath(state => {
+    if (window.TINY_API_KEY && window.TINY_API_KEY.length) {
+      setApiKey(window.TINY_API_KEY)
+      setTinify(true)
+    }
+
+    setInputPath(state => {
+      if (images.size === 0) return ''
       if (images.size === 1) return images.keys().next().value
-      else return `${images.size} images selected`
+      return `${images.size} images selected`
     })
   }, [images, setInputPath])
 
   useEffect(() => {
-    ipcRenderer.on('image:compressing', (e, { filePath, meta }) => {
-      setImages(state => imagesStatusReducer(state, {
-        type: imageStatus.COMPRESSING,
-        payload: { key: filePath, meta }
-      }))
+    [imageStatus.STARTED,
+      imageStatus.UPLOADING,
+      imageStatus.COMPRESSING,
+      imageStatus.COMPRESSED,
+      imageStatus.FAILED
+    ].forEach(STATUS => {
+      ipcRenderer.on(STATUS, (e, meta) => {
+        setImages(state => imagesStatusReducer(state, {
+          type: STATUS,
+          payload: meta
+        }))
+      })
     })
 
-    ipcRenderer.on('image:compressed', (e, { filePath, meta }) => {
-      setImages(state => imagesStatusReducer(state, {
-        type: imageStatus.COMPRESSED,
-        payload: { key: filePath, meta }
-      }))
+    ipcRenderer.on('COMPRESSIONCOUNT', (e, count) => {
+      console.log(count)
+      setCompressionCount(count)
     })
   }, [])
 
@@ -172,9 +186,12 @@ const App = () => {
     setApiKey(e.target.value)
   }, [])
 
-  const handleByTiny = useCallback(() => {
-    setByTiny(state => !state)
-  }, [])
+  const handleTinify = useCallback(() => {
+    if (!tinify && (!apiKey.trim() || apiKey.length === 0)) {
+      shell.openExternal('https://tinypng.com/developers')
+    }
+    setTinify(state => !state)
+  }, [tinify, apiKey])
 
   const handleAddMore = async () => {
     const filePaths = await getFilesFromUser()
@@ -215,13 +232,22 @@ const App = () => {
       .filter(([, { status }]) => status !== imageStatus.COMPRESSED)
       .map(([key]) => key)
 
-    ipcRenderer.send('images:compress', outputPath, filePaths)
+    ipcRenderer.send('COMPRESS', tinify, apiKey, filePaths, outputPath)
   }
 
   const rowByStatus = (status, meta) => {
-    if (status === imageStatus.READY) {
+    if (status === imageStatus.STARTED) {
       return (
-        <div>READY</div>
+        <div>STARTED</div>
+      )
+    }
+
+    if (status === imageStatus.UPLOADING) {
+      return (
+        <Fragment>
+          <div>{filesize(meta.originalSize)}</div>
+          <div>UPLOADING</div>
+        </Fragment>
       )
     }
 
@@ -239,18 +265,22 @@ const App = () => {
         <Fragment>
           <div>{filesize(meta.originalSize)}</div>
           <div>{filesize(meta.currentSize)}</div>
-          <div>{meta.compressionRate}%</div>
+          <div>{filesize(meta.savedSize)} ({meta.savedPercentage}%)</div>
         </Fragment>
       )
     }
 
     if (status === imageStatus.FAILED) {
       return (
-        <div>FAILED</div>
+        <Fragment>
+          <div>FAILED</div>
+          <div>{meta.error}</div>
+        </Fragment>
       )
     }
+
     return (
-      <div>IN PROGRESS...</div>
+      <div>READY</div>
     )
   }
 
@@ -268,7 +298,7 @@ const App = () => {
           value={outputPath}
           onClick={handleOutputPath} />
       </Pickers>
-      <TinyBar {...{ apiKey, handleApiKey, byTiny, handleByTiny }} />
+      <TinyBar {...{ compressionCount, apiKey, handleApiKey, tinify, handleTinify }} />
       <ImagesList>
         <div>
           <div>
@@ -277,10 +307,10 @@ const App = () => {
               checked={images.size === selectedCount(images) && images.size !== 0}
               onChange={handleCheckChangeAll} />
           </div>
-          <div>Filename</div>
+          <div>File Name</div>
           <div>Original Size</div>
           <div>Current Size</div>
-          <div>Compressed</div>
+          <div>Saved</div>
         </div>
         {Array.from(images).map(([key, { status, selected, meta }]) => (
           <div key={key}>
