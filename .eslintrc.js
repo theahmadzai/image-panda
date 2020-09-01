@@ -30,7 +30,7 @@ module.exports = {
     }
   },
   rules: {
-    'no-console': 0,
+    'no-console': 1,
     'comma-dangle': 1,
     'react/prop-types': 0,
     'react-hooks/rules-of-hooks': 2,
