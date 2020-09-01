@@ -2,8 +2,8 @@ const { app, dialog, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const isDev = require('electron-is-dev')
-const FilePool = require('./electron/FilePool')
-// const compressImages = require('compress-images')
+const Tinify = require('./electron/Tinify')
+const OfflineCompressor = require('./electron/OfflineCompressor')
 
 let mainWindow
 
@@ -19,7 +19,6 @@ const createWindow = () => {
     }
   })
 
-  // mainWindow.webContents.openDevTools()
   mainWindow.loadURL(isDev
     ? 'http://127.0.0.1:3000'
     : `file://${path.join(__dirname, 'build/index.html')}`)
@@ -51,55 +50,20 @@ ipcMain.on('COMPRESS', (e, tinify, apiKey, filePaths, outputPath) => {
       return
     }
 
-    compress(tinify, apiKey, filePaths, outputPath)
+    const compressor = selectCompressor(tinify, apiKey, filePaths, outputPath)
+    compressor.forwardEventsToWindow(mainWindow)
+    compressor.compress()
   })
 })
 
-const compress = (tinify, apiKey, filePaths = [], dest) => {
+const selectCompressor = (tinify, apiKey, filePaths = [], dest) => {
   if (tinify) {
-    fs.writeFile(path.join(__dirname, '.key'), apiKey.toString(), 'utf-8', (err) => {
-      if (err) {
-        // ignore
-      }
+    fs.writeFile(path.join(__dirname, '.key'), apiKey, 'utf-8', (err) => {
+      if (err) {} // ignore
     })
 
-    new FilePool(mainWindow, apiKey, filePaths, dest).compress()
-    return
+    return new Tinify(apiKey, filePaths, dest)
   }
 
-  console.log('OFFLINE COMPRESS')
-  // compressImages(
-  //   images[0].replace(/\\/g, '/'),
-  //   dest.replace(/\\/g, '/') + '/',
-  //   {
-  //     compress_force: false,
-  //     statistic: true,
-  //     autoupdate: false
-  //   },
-  //   false,
-  //   {
-  //     jpg: {
-  //       engine: 'mozjpeg', command: ['-quality', '60']
-  //     }
-  //   },
-  //   {
-  //     png:
-  //       { engine: 'pngquant', command: ['--quality=20-50', '-o'] }
-  //   },
-  //   {
-  //     svg:
-  //       { engine: 'svgo', command: '--multipass' }
-  //   },
-  //   {
-  //     gif:
-  //       { engine: 'gifsicle', command: ['--colors', '64', '--use-col=web'] }
-  //   },
-  //   function (error, completed, statistic) {
-  //     console.log('-------------')
-  //     console.log(error)
-  //     console.log(completed)
-  //     console.log(statistic)
-  //     console.log('-------------')
-  //   }
-  // )
+  return new OfflineCompressor(filePaths, dest)
 }
