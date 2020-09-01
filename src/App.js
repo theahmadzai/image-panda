@@ -55,7 +55,11 @@ const selectedCount = images => Array.from(images).reduce((t, image) => {
 const pathsToImageObjects = paths => new Map(paths.map(path => ([path, {
   status: imageStatus.READY,
   selected: false,
-  meta: {}
+  meta: {
+    originalSize: 0,
+    currentSize: 0,
+    error: ''
+  }
 }])))
 
 const imagesStoreReducer = (state, { type, payload }) => {
@@ -108,21 +112,15 @@ const imagesStatusReducer = (state = new Map(), { type, payload }) => {
   const meta = { ...payload }
   delete meta.filePath
 
-  switch (type) {
-    case imageStatus.STARTED:
-    case imageStatus.UPLOADING:
-    case imageStatus.COMPRESSING:
-    case imageStatus.COMPRESSED:
-    case imageStatus.FAILED:
-      return new Map([...state, [key, {
-        status: type,
-        selected: state.get(key).selected,
-        meta
-      }]])
-
-    default:
-      return state
+  if (Object.prototype.hasOwnProperty.call(imageStatus, type)) {
+    return new Map([...state, [key, {
+      status: type,
+      selected: state.get(key).selected,
+      meta: { ...state.get(key).meta, ...meta }
+    }]])
   }
+
+  return state
 }
 
 const App = () => {
@@ -134,11 +132,6 @@ const App = () => {
   const [compressionCount, setCompressionCount] = useState(null)
 
   useEffect(() => {
-    if (window.TINY_API_KEY && window.TINY_API_KEY.length) {
-      setApiKey(window.TINY_API_KEY)
-      setTinify(true)
-    }
-
     setInputPath(state => {
       if (images.size === 0) return ''
       if (images.size === 1) return images.keys().next().value
@@ -147,22 +140,21 @@ const App = () => {
   }, [images, setInputPath])
 
   useEffect(() => {
-    [imageStatus.STARTED,
-      imageStatus.UPLOADING,
-      imageStatus.COMPRESSING,
-      imageStatus.COMPRESSED,
-      imageStatus.FAILED
-    ].forEach(STATUS => {
-      ipcRenderer.on(STATUS, (e, meta) => {
+    if (window.TINY_API_KEY && window.TINY_API_KEY.length) {
+      setApiKey(window.TINY_API_KEY)
+      setTinify(true)
+    }
+
+    Object.values(imageStatus).forEach(status => {
+      ipcRenderer.on(status, (e, meta) => {
         setImages(state => imagesStatusReducer(state, {
-          type: STATUS,
+          type: status,
           payload: meta
         }))
       })
     })
 
     ipcRenderer.on('COMPRESSIONCOUNT', (e, count) => {
-      console.log(count)
       setCompressionCount(count)
     })
   }, [])
@@ -242,15 +234,6 @@ const App = () => {
       )
     }
 
-    if (status === imageStatus.UPLOADING) {
-      return (
-        <Fragment>
-          <div>{filesize(meta.originalSize)}</div>
-          <div>UPLOADING</div>
-        </Fragment>
-      )
-    }
-
     if (status === imageStatus.COMPRESSING) {
       return (
         <Fragment>
@@ -261,6 +244,9 @@ const App = () => {
     }
 
     if (status === imageStatus.COMPRESSED) {
+      meta.savedSize = meta.originalSize - meta.currentSize
+      meta.savedPercentage = Math.ceil(((meta.currentSize / meta.originalSize) * 100) - 100)
+
       return (
         <Fragment>
           <div>{filesize(meta.originalSize)}</div>
