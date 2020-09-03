@@ -25,7 +25,7 @@ class OfflineCompressor extends EventEmitter {
   }
 
   forwardEventsToWindow (win) {
-    Array.prototype.forEach.call(Object.values(imageStatus), status => {
+    Array.prototype.forEach.call(Object.keys(imageStatus), status => {
       this.on(status, msg => {
         win.webContents.send(status, msg)
       })
