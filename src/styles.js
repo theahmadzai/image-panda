@@ -16,3 +16,9 @@ export const formControl = css`
   outline: 0;
   padding: 4px 8px;
 `
+
+export const baseGrid = css`
+  display: grid;
+  grid-gap: 16px;
+  margin-bottom: 16px;
+`
