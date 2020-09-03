@@ -11,8 +11,8 @@ module.exports.imageSelect = Object.freeze({
 })
 
 module.exports.imageStatus = Object.freeze({
-  STARTED: 'STARTED',
-  COMPRESSING: 'COMPRESSING',
-  COMPRESSED: 'COMPRESSED',
-  FAILED: 'FAILED'
+  STARTED: 0,
+  COMPRESSING: 1,
+  COMPRESSED: 2,
+  FAILED: 3
 })
