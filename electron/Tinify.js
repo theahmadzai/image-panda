@@ -41,14 +41,14 @@ class Tinify extends EventEmitter {
   }
 
   forwardEventsToWindow (win) {
-    Object.values(imageStatus).forEach(status => {
+    Object.keys(imageStatus).forEach(status => {
       this.on(status, msg => {
         win.webContents.send(status, msg)
       })
     })
 
-    this.on('COMPRESSIONCOUNT', msg => {
-      win.webContents.send('COMPRESSIONCOUNT', msg)
+    this.on('cmpcount', msg => {
+      win.webContents.send('cmpcount', msg)
     })
   }
 
