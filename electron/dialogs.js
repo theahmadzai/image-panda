@@ -1,4 +1,4 @@
-const { dialog } = require('electron')
+const { dialog, BrowserWindow } = require('electron')
 
 const inputPathOptions = {
   filters: [
@@ -15,7 +15,7 @@ const outputPathOptions = {
 }
 
 const openDialog = options => {
-  return dialog.showOpenDialog(null, options)
+  return dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), options)
     .then(({ canceled, filePaths }) => {
       return (!canceled && filePaths.length) && filePaths
     })
