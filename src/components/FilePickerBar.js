@@ -5,7 +5,7 @@ import { AppContext } from '../AppContext'
 import { ImagesContext } from '../ImagesContext'
 import { imageActionType } from '../constants'
 import FilePicker from './FilePicker'
-import { pathsToImageObjects } from '../utils'
+import { filePathsToImages } from '../utils'
 const { remote } = window.require('electron')
 const { getImagesFromUser, getDirectoryFromUser } = remote.require('./electron/dialogs.js')
 
@@ -36,7 +36,7 @@ const FilePickerBar = () => {
 
     filePaths && dispatchImages({
       type: imageActionType.SET,
-      payload: pathsToImageObjects(filePaths)
+      payload: filePathsToImages(filePaths)
     })
   }
 

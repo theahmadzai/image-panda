@@ -5,7 +5,7 @@ import { Stack, Button } from '../elements'
 import FilePickerBar from './FilePickerBar'
 import TinyfyBar from './TinyfyBar'
 import ImageList from './ImageList'
-import { pathsToImageObjects } from '../utils'
+import { filePathsToImages } from '../utils'
 import {
   imageActionType,
   imageStatus,
@@ -43,7 +43,7 @@ const App = () => {
 
     filePaths && dispatchImages({
       type: imageActionType.ADD,
-      payload: pathsToImageObjects(filePaths)
+      payload: filePathsToImages(filePaths)
     })
   }
 
