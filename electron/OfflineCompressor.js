@@ -1,13 +1,17 @@
 const fs = require('fs')
 const path = require('path')
-const EventEmitter = require('events')
 const { promisify } = require('util')
+const { eachLimit } = require('async')
 const imagemin = require('imagemin')
 const imageminJpegtran = require('imagemin-jpegtran')
 const imageminPngquant = require('imagemin-pngquant')
 const imageminGifsicle = require('imagemin-gifsicle')
 const imageminSvgo = require('imagemin-svgo')
-const { imageStatus } = require('./../src/constants')
+const WindowEventEmitter = require('./WindowEventEmitter')
+const {
+  imageStatus,
+  COMPRESSION_STATUS
+} = require('./../src/constants')
 
 const imageminPlugins = [
   imageminJpegtran(),
@@ -16,7 +20,7 @@ const imageminPlugins = [
   imageminSvgo()
 ]
 
-class OfflineCompressor extends EventEmitter {
+class OfflineCompressor extends WindowEventEmitter {
   constructor (filePaths = [], dest) {
     super()
 
@@ -24,24 +28,18 @@ class OfflineCompressor extends EventEmitter {
     this.dest = dest
   }
 
-  forwardEventsToWindow (win) {
-    Array.prototype.forEach.call(Object.keys(imageStatus), status => {
-      this.on(status, msg => {
-        win.webContents.send(status, msg)
-      })
-    })
-  }
+  async compress () {
+    this.emit(COMPRESSION_STATUS, true)
 
-  compress () {
-    Array.prototype.forEach.call(this.filePaths, this.compressImage.bind(this))
+    await eachLimit(this.filePaths, 4, this.compressImage.bind(this))
+
+    this.emit(COMPRESSION_STATUS, false)
   }
 
   async compressImage (filePath) {
     const meta = { filePath }
 
     try {
-      this.emit(imageStatus.STARTED, meta)
-
       const image = await promisify(fs.readFile)(filePath)
       const imageBuffer = Buffer.from(image)
       meta.originalSize = Buffer.byteLength(imageBuffer)
