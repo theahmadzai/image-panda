@@ -8,9 +8,7 @@ const Label = styled.label`
 `
 
 const FilePicker = props => {
-  const { label } = props
-  const inputProps = { ...props }
-  delete inputProps.label
+  const { label, ...inputProps } = props
 
   return (
     <div>
