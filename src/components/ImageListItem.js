@@ -5,7 +5,6 @@ import { imageStatus } from '../constants'
 const ImageListItem = ({ filePath, image, onCheckChange }) => {
   const { selected, status, meta } = image
 
-  console.log('called')
   let row = null
 
   switch (status) {
