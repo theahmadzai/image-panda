@@ -1,9 +1,22 @@
-const { app, dialog, BrowserWindow, ipcMain } = require('electron')
+const { BrowserWindow, Menu, app, ipcMain, dialog } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const isDev = require('electron-is-dev')
-const Tinify = require('./electron/Tinify')
+const menu = require('./electron/menu')
+const TinifyCompressor = require('./electron/TinifyCompressor')
 const OfflineCompressor = require('./electron/OfflineCompressor')
+const {
+  imageStatus,
+  COMPRESSION_START,
+  COMPRESSION_STATUS,
+  COMPRESSION_COUNT
+} = require('./src/constants')
+
+const eventList = [
+  ...Object.values(imageStatus),
+  COMPRESSION_STATUS,
+  COMPRESSION_COUNT
+]
 
 let mainWindow
 
@@ -18,6 +31,8 @@ const createWindow = () => {
       preload: path.resolve(__dirname, 'electron/preload.js')
     }
   })
+
+  Menu.setApplicationMenu(menu)
 
   mainWindow.loadURL(isDev
     ? 'http://127.0.0.1:3000'
@@ -38,7 +53,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-ipcMain.on('COMPRESS', (e, tinify, apiKey, filePaths, outputPath) => {
+ipcMain.on(COMPRESSION_START, (e, { useTinify, apiKey, outputPath }, filePaths) => {
   if (filePaths.length <= 0) {
     dialog.showErrorBox('No files selected', 'You must select files first.')
     return
@@ -50,19 +65,19 @@ ipcMain.on('COMPRESS', (e, tinify, apiKey, filePaths, outputPath) => {
       return
     }
 
-    const compressor = selectCompressor(tinify, apiKey, filePaths, outputPath)
-    compressor.forwardEventsToWindow(mainWindow)
+    const compressor = selectCompressor(useTinify, apiKey, filePaths, outputPath)
+    compressor.forwardEventsToWindow(eventList, mainWindow)
     compressor.compress()
   })
 })
 
-const selectCompressor = (tinify, apiKey, filePaths = [], dest) => {
-  if (tinify) {
+const selectCompressor = (useTinify, apiKey, filePaths = [], dest) => {
+  if (useTinify) {
     fs.writeFile(path.join(__dirname, '.key'), apiKey, 'utf-8', (err) => {
       if (err) {} // ignore
     })
 
-    return new Tinify(apiKey, filePaths, dest)
+    return new TinifyCompressor(apiKey, filePaths, dest)
   }
 
   return new OfflineCompressor(filePaths, dest)
