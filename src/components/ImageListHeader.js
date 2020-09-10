@@ -1,6 +1,6 @@
 import React from 'react'
 import { imageActionType } from '../constants'
-import { useImages } from '../ImagesContext'
+import { useImages } from '../contexts/ImagesContext'
 
 const ImageListHeader = () => {
   const { images, dispatchImages } = useImages()

@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/styled'
-import { useApp } from '../AppContext'
+import { useApp } from '../contexts/AppContext'
 import { formControl, baseGrid } from '../styles'
 import { Input } from '../elements'
 const { shell } = window.require('electron')

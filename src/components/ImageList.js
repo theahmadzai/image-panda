@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from 'react'
 import styled from '@emotion/styled'
 import { imageActionType, imageStatus } from '../constants'
-import { useImages } from '../ImagesContext'
+import { useImages } from '../contexts/ImagesContext'
 import ImageListHeader from './ImageListHeader'
 import ImageListItem from './ImageListItem'
 const { ipcRenderer } = window.require('electron')
