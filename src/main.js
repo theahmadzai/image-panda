@@ -10,7 +10,7 @@ const {
   COMPRESSION_START,
   COMPRESSION_STATUS,
   COMPRESSION_COUNT
-} = require('./src/constants')
+} = require('./constants')
 
 const eventList = [
   ...Object.values(imageStatus),
@@ -32,7 +32,9 @@ const createWindow = () => {
     }
   })
 
-  Menu.setApplicationMenu(menu)
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate(menu)
+  )
 
   mainWindow.loadURL(isDev
     ? 'http://127.0.0.1:3000'

@@ -3,7 +3,11 @@ const path = require('path')
 const { promisify } = require('util')
 const tinify = require('tinify')
 const WindowEventEmitter = require('./WindowEventEmitter')
-const { imageStatus, COMPRESSION_COUNT, COMPRESSION_STATUS } = require('../src/constants')
+const {
+  imageStatus,
+  COMPRESSION_COUNT,
+  COMPRESSION_STATUS
+} = require('../constants')
 
 class Tinify extends WindowEventEmitter {
   constructor (apiKey, filePaths = [], dest) {

@@ -11,7 +11,7 @@ const WindowEventEmitter = require('./WindowEventEmitter')
 const {
   imageStatus,
   COMPRESSION_STATUS
-} = require('./../src/constants')
+} = require('../constants')
 
 const imageminPlugins = [
   imageminJpegtran(),
