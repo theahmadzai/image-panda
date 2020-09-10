@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
-import { useApp } from '../AppContext'
-import { useImages } from '../ImagesContext'
+import { Global } from '@emotion/core'
+import { globalStyles } from '../styles'
+import { useApp } from '../contexts/AppContext'
+import { useImages } from '../contexts/ImagesContext'
 import { Stack, Button } from '../elements'
 import FilePickerBar from './FilePickerBar'
 import TinyfyBar from './TinyfyBar'
@@ -65,6 +67,7 @@ const App = () => {
 
   return (
     <div className="App">
+      <Global styles={globalStyles}/>
       <FilePickerBar />
       <TinyfyBar/>
       <ImageList />
