@@ -1,8 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './index.css'
-import { AppProvider } from './AppContext'
-import { ImagesProvider } from './ImagesContext'
+import { AppProvider } from './contexts/AppContext'
+import { ImagesProvider } from './contexts/ImagesContext'
 import App from './components/App'
 
 ReactDOM.render(
