@@ -13,6 +13,7 @@ import {
   imageStatus,
   READY_TO_COMPRESS,
   COMPRESSION_START,
+  COMPRESSION_STATUS,
   COMPRESSION_COUNT
 } from '../constants'
 
@@ -33,7 +34,7 @@ const App = () => {
       setApp(state => ({ ...state, compressionCount }))
     })
 
-    window.ipcRenderer.on('COMPRESSION_STATUS', (e, compressing) => {
+    window.ipcRenderer.on(COMPRESSION_STATUS, (e, compressing) => {
       setApp(state => ({ ...state, compressing }))
     })
   }, [setApp])
