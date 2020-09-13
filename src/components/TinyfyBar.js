@@ -33,7 +33,6 @@ const TinyfyBar = () => {
 
   const handleCheckChange = event => {
     if (!useTinify && (!apiKey || !apiKey.trim().length === 0)) {
-      console.log(window.shell)
       window.shell.openTinyPngApiDocs()
     }
 
