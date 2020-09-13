@@ -3,6 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const isDev = require('electron-is-dev')
 const menu = require('./electron/menu')
+const { getImagesFromUser, getDirectoryFromUser } = require('./electron/dialogs.js')
 const TinifyCompressor = require('./electron/TinifyCompressor')
 const OfflineCompressor = require('./electron/OfflineCompressor')
 const {
@@ -27,6 +28,7 @@ const createWindow = () => {
     show: false,
     // icon: path.join(__dirname, 'public/logo.svg'),
     webPreferences: {
+      enableRemoteModule: false,
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
       preload: path.resolve(__dirname, 'electron/preload.js')
@@ -55,6 +57,10 @@ app.on('activate', () => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
+
+ipcMain.handle('GET_IMAGES_FROM_USER', getImagesFromUser)
+
+ipcMain.handle('GET_DIRECTORY_FROM_USER', getDirectoryFromUser)
 
 ipcMain.on(COMPRESSION_START, (e, { filePaths, app: { useTinify, apiKey, outputPath } }) => {
   if (filePaths.length <= 0) {
