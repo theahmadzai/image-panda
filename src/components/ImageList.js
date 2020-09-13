@@ -4,7 +4,6 @@ import { imageActionType, imageStatus } from '../constants'
 import { useImages } from '../contexts/ImagesContext'
 import ImageListHeader from './ImageListHeader'
 import ImageListItem from './ImageListItem'
-const { ipcRenderer } = window.require('electron')
 
 const List = styled.div`
   background: #fff;
@@ -42,7 +41,7 @@ const ImageList = () => {
 
   useEffect(() => {
     Object.values(imageStatus).forEach(status => {
-      ipcRenderer.on(status, (e, { filePath, ...meta }) => {
+      window.ipcRenderer.on(status, (e, { filePath, ...meta }) => {
         dispatchImages(({
           type: imageActionType.CHANGE_STATUS,
           payload: { status, filePath, meta }

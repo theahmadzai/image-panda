@@ -15,33 +15,31 @@ import {
   COMPRESSION_START,
   COMPRESSION_COUNT
 } from '../constants'
-const { ipcRenderer, remote } = window.require('electron')
-const { getImagesFromUser } = remote.require('./electron/dialogs.js')
 
 const App = () => {
   const { app, setApp } = useApp()
   const { images, dispatchImages } = useImages()
 
   useEffect(() => {
-    if (window.TINY_API_KEY && window.TINY_API_KEY.length) {
+    if (window.tinify.apiKey && window.tinify.apiKey.length) {
       setApp(state => ({
         ...state,
-        apiKey: window.TINY_API_KEY,
+        apiKey: window.tinify.apiKey,
         useTinify: true
       }))
     }
 
-    ipcRenderer.on(COMPRESSION_COUNT, (e, compressionCount) => {
+    window.ipcRenderer.on(COMPRESSION_COUNT, (e, compressionCount) => {
       setApp(state => ({ ...state, compressionCount }))
     })
 
-    ipcRenderer.on('COMPRESSION_STATUS', (e, compressing) => {
+    window.ipcRenderer.on('COMPRESSION_STATUS', (e, compressing) => {
       setApp(state => ({ ...state, compressing }))
     })
   }, [setApp])
 
   const handleAddMore = async () => {
-    const filePaths = await getImagesFromUser()
+    const filePaths = await window.dialog.getImagesFromUser()
 
     filePaths && dispatchImages({
       type: imageActionType.ADD,
@@ -60,7 +58,7 @@ const App = () => {
       .filter(([, { status }]) => status === READY_TO_COMPRESS || status === imageStatus.FAILED)
       .map(([key]) => key)
 
-    ipcRenderer.send(COMPRESSION_START, app, filePaths)
+    window.ipcRenderer.send(COMPRESSION_START, { filePaths, app })
   }
 
   const { compressing } = app

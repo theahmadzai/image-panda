@@ -6,8 +6,6 @@ import { ImagesContext } from '../contexts/ImagesContext'
 import { imageActionType } from '../constants'
 import FilePicker from './FilePicker'
 import { filePathsToImages } from '../utils'
-const { remote } = window.require('electron')
-const { getImagesFromUser, getDirectoryFromUser } = remote.require('./electron/dialogs.js')
 
 const Grid = styled.div`
   ${baseGrid}
@@ -32,7 +30,7 @@ const FilePickerBar = () => {
   }, [images, setApp])
 
   const handleInputPicker = async () => {
-    const filePaths = await getImagesFromUser()
+    const filePaths = await window.dialog.getImagesFromUser()
 
     filePaths && dispatchImages({
       type: imageActionType.SET,
@@ -41,7 +39,7 @@ const FilePickerBar = () => {
   }
 
   const handleOutputPicker = async () => {
-    const directory = await getDirectoryFromUser()
+    const directory = await window.dialog.getDirectoryFromUser()
 
     directory && setApp(state => ({
       outputPath: directory

@@ -3,7 +3,6 @@ import styled from '@emotion/styled'
 import { useApp } from '../contexts/AppContext'
 import { formControl, baseGrid } from '../styles'
 import { Input } from '../elements'
-const { shell } = window.require('electron')
 
 const Grid = styled.div`
   ${baseGrid}
@@ -34,7 +33,8 @@ const TinyfyBar = () => {
 
   const handleCheckChange = event => {
     if (!useTinify && (!apiKey || !apiKey.trim().length === 0)) {
-      shell.openExternal('https://tinypng.com/developers')
+      console.log(window.shell)
+      window.shell.openTinyPngApiDocs()
     }
 
     const { checked } = event.target
