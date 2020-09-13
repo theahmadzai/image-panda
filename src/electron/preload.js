@@ -1,19 +1,24 @@
 const fs = require('fs')
 const path = require('path')
-const { remote, ipcRenderer, contextBridge, shell } = require('electron')
-const { getImagesFromUser, getDirectoryFromUser } = remote.require('./electron/dialogs.js')
+const { ipcRenderer, contextBridge, shell } = require('electron')
 
-const apiKey = fs.readFileSync(path.resolve(__dirname, '../../.key'))
-  .toString()
-  .trim()
+const readApiKey = () => {
+  try {
+    return fs.readFileSync(path.resolve(__dirname, '../../.key'))
+      .toString()
+      .trim()
+  } catch (err) {
+    // ignore
+  }
+}
 
 contextBridge.exposeInMainWorld('tinify', {
-  apiKey
+  apiKey: readApiKey()
 })
 
 contextBridge.exposeInMainWorld('dialog', {
-  getImagesFromUser,
-  getDirectoryFromUser
+  getImagesFromUser: async () => await ipcRenderer.invoke('GET_IMAGES_FROM_USER'),
+  getDirectoryFromUser: async () => await ipcRenderer.invoke('GET_DIRECTORY_FROM_USER')
 })
 
 contextBridge.exposeInMainWorld('ipcRenderer', {
