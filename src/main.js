@@ -27,7 +27,8 @@ const createWindow = () => {
     show: false,
     // icon: path.join(__dirname, 'public/logo.svg'),
     webPreferences: {
-      nodeIntegration: true,
+      worldSafeExecuteJavaScript: true,
+      contextIsolation: true,
       preload: path.resolve(__dirname, 'electron/preload.js')
     }
   })
@@ -55,7 +56,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-ipcMain.on(COMPRESSION_START, (e, { useTinify, apiKey, outputPath }, filePaths) => {
+ipcMain.on(COMPRESSION_START, (e, { filePaths, app: { useTinify, apiKey, outputPath } }) => {
   if (filePaths.length <= 0) {
     dialog.showErrorBox('No files selected', 'You must select files first.')
     return
