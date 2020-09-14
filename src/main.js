@@ -26,7 +26,7 @@ const createWindow = () => {
     minWidth: 800,
     minHeight: 600,
     show: false,
-    // icon: path.join(__dirname, 'public/logo.svg'),
+    icon: path.join(__dirname, '../public/icon.png'),
     webPreferences: {
       enableRemoteModule: false,
       worldSafeExecuteJavaScript: true,
