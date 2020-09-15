@@ -1,17 +1,13 @@
 const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
-const { eachLimit } = require('async')
 const imagemin = require('imagemin')
 const imageminJpegtran = require('imagemin-jpegtran')
 const imageminPngquant = require('imagemin-pngquant')
 const imageminGifsicle = require('imagemin-gifsicle')
 const imageminSvgo = require('imagemin-svgo')
-const WindowEventEmitter = require('./WindowEventEmitter')
-const {
-  imageStatus,
-  COMPRESSION_STATUS
-} = require('../constants')
+const Compressor = require('./Compressor')
+const { imageStatus } = require('../constants')
 
 const imageminPlugins = [
   imageminJpegtran(),
@@ -20,20 +16,11 @@ const imageminPlugins = [
   imageminSvgo()
 ]
 
-class OfflineCompressor extends WindowEventEmitter {
+class OfflineCompressor extends Compressor {
   constructor (filePaths = [], dest) {
-    super()
+    super(filePaths, dest)
 
-    this.filePaths = filePaths
-    this.dest = dest
-  }
-
-  async compress () {
-    this.emit(COMPRESSION_STATUS, true)
-
-    await eachLimit(this.filePaths, 4, this.compressImage.bind(this))
-
-    this.emit(COMPRESSION_STATUS, false)
+    this.MAX_ALLOWED = 4
   }
 
   async compressImage (filePath) {
@@ -57,6 +44,8 @@ class OfflineCompressor extends WindowEventEmitter {
       )
 
       this.emit(imageStatus.COMPRESSED, meta)
+
+      this.bytesSaved += meta.originalSize - meta.currentSize
     } catch (err) {
       meta.error = 'Error compressing file.'
 

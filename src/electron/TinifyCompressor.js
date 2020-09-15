@@ -2,31 +2,16 @@ const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
 const tinify = require('tinify')
-const WindowEventEmitter = require('./WindowEventEmitter')
-const {
-  imageStatus,
-  COMPRESSION_COUNT,
-  COMPRESSION_STATUS
-} = require('../constants')
+const Compressor = require('./Compressor')
+const { imageStatus, COMPRESSION_COUNT } = require('../constants')
 
-class Tinify extends WindowEventEmitter {
+class TinifyCompressor extends Compressor {
   constructor (apiKey, filePaths = [], dest) {
-    super()
+    super(filePaths, dest)
 
     tinify.key = apiKey
 
-    this.filePaths = filePaths
-    this.sources = []
-    this.dest = dest
-    this.uploading = 0
-    this.downloading = 0
-    this.compressionCount = 0
-  }
-
-  static getNextAllowed (arr = [], inProgress = 0) {
-    return Array.prototype.splice.call(
-      arr, 0, Math.abs(Tinify.MAX_ALLOWED - inProgress)
-    )
+    this.MAX_ALLOWED = 20
   }
 
   static getErrorMessage (err) {
@@ -44,50 +29,7 @@ class Tinify extends WindowEventEmitter {
     return 'Unable to read data from file.'
   }
 
-  nextFilePaths () {
-    return Tinify.getNextAllowed(this.filePaths, this.uploading)
-  }
-
-  nextSources () {
-    return Tinify.getNextAllowed(this.sources, this.downloading)
-  }
-
-  imageUploaded () {
-    this.uploading -= 1
-    this.uploadImages()
-
-    if (this.downloading <= Tinify.MAX_ALLOWED) {
-      this.downloadImages()
-    }
-  }
-
-  imageDownloaded () {
-    this.downloading -= 1
-    this.downloadImages()
-
-    if (this.sources.length === 0 && this.filePaths.length === 0) {
-      this.emit(COMPRESSION_STATUS, false)
-    }
-  }
-
-  uploadImages () {
-    const filePaths = this.nextFilePaths()
-
-    if (filePaths.length === 0) return
-
-    Array.prototype.forEach.call(filePaths, this.uploadImage.bind(this))
-  }
-
-  downloadImages () {
-    const sources = this.nextSources()
-
-    if (sources.length === 0) return
-
-    Array.prototype.forEach.call(sources, this.downloadImage.bind(this))
-  }
-
-  async uploadImage (filePath) {
-    this.uploading += 1
+  async compressImage (filePath) {
     const meta = { filePath }
 
     try {
@@ -95,25 +37,9 @@ class Tinify extends WindowEventEmitter {
       const imageBuffer = Buffer.from(image)
       meta.originalSize = Buffer.byteLength(imageBuffer)
 
-      const source = await tinify.fromBuffer(imageBuffer)
-
       this.emit(imageStatus.COMPRESSING, meta)
 
-      this.sources.push({ source, meta })
-    } catch (err) {
-      this.uploading -= 1
-      meta.error = Tinify.getErrorMessage(err)
-
-      this.emit(imageStatus.FAILED, meta)
-    } finally {
-      this.imageUploaded()
-    }
-  }
-
-  async downloadImage ({ source, meta }) {
-    this.downloading += 1
-
-    try {
+      const source = await tinify.fromBuffer(imageBuffer)
       const compressedImage = await source.result()
       meta.currentSize = await compressedImage.size()
 
@@ -123,23 +49,14 @@ class Tinify extends WindowEventEmitter {
 
       this.emit(imageStatus.COMPRESSED, meta)
       this.emit(COMPRESSION_COUNT, tinify.compressionCount)
+
+      this.bytesSaved += meta.originalSize - meta.currentSize
     } catch (err) {
-      this.downloading -= 1
-      meta.error = Tinify.getErrorMessage(err)
+      meta.error = TinifyCompressor.getErrorMessage(err)
 
       this.emit(imageStatus.FAILED, meta)
-    } finally {
-      this.imageDownloaded()
     }
-  }
-
-  compress () {
-    this.emit(COMPRESSION_STATUS, true)
-
-    this.uploadImages()
   }
 }
 
-Tinify.MAX_ALLOWED = 10
-
-module.exports = Tinify
+module.exports = TinifyCompressor
