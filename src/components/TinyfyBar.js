@@ -33,7 +33,7 @@ const TinyfyBar = () => {
 
   const handleCheckChange = event => {
     if (!useTinify && (!apiKey || !apiKey.trim().length === 0)) {
-      window.shell.openTinyPngApiDocs()
+      window.electron.openTinyPngApiDocs()
     }
 
     const { checked } = event.target

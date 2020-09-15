@@ -12,22 +12,30 @@ const readApiKey = () => {
   }
 }
 
-contextBridge.exposeInMainWorld('tinify', {
-  apiKey: readApiKey()
-})
+const openTinyPngApiDocs = () => {
+  shell.openExternal('https://tinypng.com/developers')
+}
 
-contextBridge.exposeInMainWorld('dialog', {
-  getImagesFromUser: async () => await ipcRenderer.invoke('GET_IMAGES_FROM_USER'),
-  getDirectoryFromUser: async () => await ipcRenderer.invoke('GET_DIRECTORY_FROM_USER')
-})
+const getImagesFromUser = async () => {
+  return await ipcRenderer.invoke('GET_IMAGES_FROM_USER')
+}
+const getDirectoryFromUser = async () => {
+  return await ipcRenderer.invoke('GET_DIRECTORY_FROM_USER')
+}
 
-contextBridge.exposeInMainWorld('ipcRenderer', {
+const ipc = {
   on: (event, data) => ipcRenderer.on(event, data),
   send: (channel, arg) => ipcRenderer.send(channel, arg)
-})
+}
 
-contextBridge.exposeInMainWorld('shell', {
-  openTinyPngApiDocs: () => {
-    shell.openExternal('https://tinypng.com/developers')
-  }
+contextBridge.exposeInMainWorld('electron', {
+  tinify: {
+    apiKey: readApiKey()
+  },
+  openTinyPngApiDocs,
+  dialog: {
+    getImagesFromUser,
+    getDirectoryFromUser
+  },
+  ipc
 })

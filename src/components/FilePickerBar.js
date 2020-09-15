@@ -30,7 +30,7 @@ const FilePickerBar = () => {
   }, [images, setApp])
 
   const handleInputPicker = async () => {
-    const filePaths = await window.dialog.getImagesFromUser()
+    const filePaths = await window.electron.dialog.getImagesFromUser()
 
     filePaths && dispatchImages({
       type: imageActionType.SET,
@@ -39,7 +39,7 @@ const FilePickerBar = () => {
   }
 
   const handleOutputPicker = async () => {
-    const directory = await window.dialog.getDirectoryFromUser()
+    const directory = await window.electron.dialog.getDirectoryFromUser()
 
     directory && setApp(state => ({
       outputPath: directory

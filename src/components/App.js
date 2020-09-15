@@ -22,25 +22,27 @@ const App = () => {
   const { images, dispatchImages } = useImages()
 
   useEffect(() => {
-    if (window.tinify.apiKey && window.tinify.apiKey.length) {
+    const apiKey = window.electron.tinify.apiKey
+
+    if (apiKey && apiKey.length) {
       setApp(state => ({
         ...state,
-        apiKey: window.tinify.apiKey,
+        apiKey,
         useTinify: true
       }))
     }
 
-    window.ipcRenderer.on(COMPRESSION_COUNT, (e, compressionCount) => {
+    window.electron.ipc.on(COMPRESSION_COUNT, (e, compressionCount) => {
       setApp(state => ({ ...state, compressionCount }))
     })
 
-    window.ipcRenderer.on(COMPRESSION_STATUS, (e, compressing) => {
+    window.electron.ipc.on(COMPRESSION_STATUS, (e, compressing) => {
       setApp(state => ({ ...state, compressing }))
     })
   }, [setApp])
 
   const handleAddMore = async () => {
-    const filePaths = await window.dialog.getImagesFromUser()
+    const filePaths = await window.electron.dialog.getImagesFromUser()
 
     filePaths && dispatchImages({
       type: imageActionType.ADD,
@@ -59,7 +61,7 @@ const App = () => {
       .filter(([, { status }]) => status === READY_TO_COMPRESS || status === imageStatus.FAILED)
       .map(([key]) => key)
 
-    window.ipcRenderer.send(COMPRESSION_START, { filePaths, app })
+    window.electron.ipc.send(COMPRESSION_START, { filePaths, app })
   }
 
   const { compressing } = app

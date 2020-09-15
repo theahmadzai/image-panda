@@ -41,7 +41,7 @@ const ImageList = () => {
 
   useEffect(() => {
     Object.values(imageStatus).forEach(status => {
-      window.ipcRenderer.on(status, (e, { filePath, ...meta }) => {
+      window.electron.ipc.on(status, (e, { filePath, ...meta }) => {
         dispatchImages(({
           type: imageActionType.CHANGE_STATUS,
           payload: { status, filePath, meta }
