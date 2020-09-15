@@ -83,7 +83,7 @@ ipcMain.on(COMPRESSION_START, (e, { filePaths, app: { useTinify, apiKey, outputP
 
 const selectCompressor = (useTinify, apiKey, filePaths = [], dest) => {
   if (useTinify) {
-    fs.writeFile(path.join(__dirname, '../key'), apiKey, 'utf-8', (err) => {
+    fs.writeFile(path.join(__dirname, '../.key'), apiKey, 'utf-8', (err) => {
       if (err) {} // ignore
     })
 
