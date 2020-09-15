@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styled from '@emotion/styled'
 import { useApp } from '../contexts/AppContext'
 import { formControl, baseGrid } from '../styles'
 import { Input } from '../elements'
+import { COMPRESSION_COUNT } from '../constants'
 
 const Grid = styled.div`
   ${baseGrid}
@@ -24,6 +25,22 @@ const Compressions = styled.div`
 const TinyfyBar = () => {
   const { app, setApp } = useApp()
   const { useTinify, apiKey, compressionCount } = app
+
+  useEffect(() => {
+    const apiKey = window.electron.tinify.apiKey
+
+    if (apiKey && apiKey.length) {
+      setApp(state => ({
+        ...state,
+        apiKey,
+        useTinify: true
+      }))
+    }
+
+    window.electron.ipc.on(COMPRESSION_COUNT, (e, compressionCount) => {
+      setApp(state => ({ ...state, compressionCount }))
+    })
+  }, [setApp])
 
   const handleKeyChange = event => {
     const { value } = event.target

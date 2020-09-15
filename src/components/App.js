@@ -13,8 +13,7 @@ import {
   imageStatus,
   READY_TO_COMPRESS,
   COMPRESSION_START,
-  COMPRESSION_STATUS,
-  COMPRESSION_COUNT
+  COMPRESSION_STATUS
 } from '../constants'
 
 const App = () => {
@@ -22,20 +21,6 @@ const App = () => {
   const { images, dispatchImages } = useImages()
 
   useEffect(() => {
-    const apiKey = window.electron.tinify.apiKey
-
-    if (apiKey && apiKey.length) {
-      setApp(state => ({
-        ...state,
-        apiKey,
-        useTinify: true
-      }))
-    }
-
-    window.electron.ipc.on(COMPRESSION_COUNT, (e, compressionCount) => {
-      setApp(state => ({ ...state, compressionCount }))
-    })
-
     window.electron.ipc.on(COMPRESSION_STATUS, (e, compressing) => {
       setApp(state => ({ ...state, compressing }))
     })
