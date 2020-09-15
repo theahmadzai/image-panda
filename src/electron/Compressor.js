@@ -26,7 +26,7 @@ class Compressor extends WindowEventEmitter {
 
     this.notify({
       imagesCompressed: this.filePaths.length,
-      bytesSaved: this.bytesSaved,
+      bytesSaved: Math.abs(this.bytesSaved),
       timeTaken: new Date(new Date() - this.startTime)
     })
   }
