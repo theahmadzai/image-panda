@@ -8,6 +8,7 @@ const TinifyCompressor = require('./electron/TinifyCompressor')
 const OfflineCompressor = require('./electron/OfflineCompressor')
 const {
   imageStatus,
+  ICON_PATH,
   COMPRESSION_START,
   COMPRESSION_STATUS,
   COMPRESSION_COUNT
@@ -26,7 +27,7 @@ const createWindow = () => {
     minWidth: 800,
     minHeight: 600,
     show: false,
-    icon: path.join(__dirname, '../public/icon.png'),
+    icon: ICON_PATH,
     webPreferences: {
       enableRemoteModule: false,
       worldSafeExecuteJavaScript: true,
