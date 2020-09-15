@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports.imageActionType = Object.freeze({
   SET: 0,
   ADD: 1,
@@ -13,7 +15,8 @@ module.exports.imageStatus = Object.freeze({
   FAILED: 'FAILED'
 })
 
+module.exports.ICON_PATH = path.join(__dirname, '../public/icon.png')
 module.exports.READY_TO_COMPRESS = 'READY_TO_COMPRESS'
 module.exports.COMPRESSION_START = 'COMPRESSION_START'
-module.exports.COMPRESSION_STATUS = 'COMPRESSION_DONE'
+module.exports.COMPRESSION_STATUS = 'COMPRESSION_STATUS'
 module.exports.COMPRESSION_COUNT = 'COMPRESSION_COUNT'
