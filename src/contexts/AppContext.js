@@ -4,7 +4,7 @@ const initialState = {
   inputPath: '',
   outputPath: '',
   compressing: false,
-  uesTinify: false,
+  useTinify: false,
   apiKey: '',
   compressionCount: 0
 }
