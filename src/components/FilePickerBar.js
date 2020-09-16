@@ -41,9 +41,7 @@ const FilePickerBar = () => {
   const handleOutputPicker = async () => {
     const directory = await window.electron.dialog.getDirectoryFromUser()
 
-    directory && setApp(state => ({
-      outputPath: directory
-    }))
+    directory && setApp(state => ({ ...state, outputPath: directory }))
   }
 
   return (
