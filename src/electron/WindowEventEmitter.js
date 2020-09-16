@@ -18,7 +18,7 @@ class WindowEventEmitter extends EventEmitter {
         : `${timeTaken.getMilliseconds()}ms`
 
     new Notification({
-      title: `${imagesCompressed} images compressed`,
+      title: `${imagesCompressed} image${imagesCompressed !== 1 ? 's' : ''} compressed`,
       body: `${filesize(bytesSaved)} saved in ${time}`,
       icon: ICON_PATH
     }).show()
