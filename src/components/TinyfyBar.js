@@ -71,7 +71,7 @@ const TinyfyBar = () => {
         <label>TinyPNG</label>
         <input
           type="checkbox"
-          value={useTinify}
+          checked={useTinify}
           onChange={handleCheckChange} />
       </Checkbox>
     </Grid>
