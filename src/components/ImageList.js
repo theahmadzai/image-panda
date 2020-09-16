@@ -1,8 +1,7 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useCallback, useMemo, memo } from 'react'
 import styled from '@emotion/styled'
 import { imageActionType, imageStatus } from '../constants'
 import { useImages } from '../contexts/ImagesContext'
-import ImageListHeader from './ImageListHeader'
 import ImageListItem from './ImageListItem'
 
 const List = styled.div`
@@ -19,17 +18,21 @@ const List = styled.div`
     display: grid;
     font-size: 14px;
     font-weight: 400;
-    grid-template-columns: auto auto auto auto auto;
+    grid-template-columns: max-content 50% repeat(3, 15%);
+    overflow: none;
 
     div {
       padding: 4px;
     }
   }
 
+  & > :nth-of-type(even) {
+    background: #efefef;
+  }
+
   & > :first-of-type {
-    background: #f0f0f0;
-    color: #000;
-    height: 35px;
+    background: #444;
+    color: #eee;
     left: 0;
     position: sticky;
     top: 0;
@@ -50,6 +53,15 @@ const ImageList = () => {
     })
   }, [dispatchImages])
 
+  const handleCheckChangeAll = useCallback(e => {
+    const { checked } = e.target
+
+    dispatchImages({
+      type: imageActionType.CHECK_CHANGE_ALL,
+      payload: checked
+    })
+  }, [dispatchImages])
+
   const handleCheckChange = useCallback(key => {
     dispatchImages({
       type: imageActionType.CHECK_CHANGE,
@@ -57,18 +69,41 @@ const ImageList = () => {
     })
   }, [dispatchImages])
 
-  return (
-    <List>
-      <ImageListHeader/>
-      {Array.from(images, ([filePath, image]) => (
-        <ImageListItem
-          key={filePath}
-          filePath={filePath}
-          onCheckChange={handleCheckChange}
-          image={image} />
-      ))}
-    </List>
-  )
+  const selectedCount = React.useMemo(() => Array.from(images).reduce((t, [, { selected }]) => {
+    return selected ? t + 1 : t
+  }, 0), [images])
+
+  const imageListHeader = useMemo(() => (
+    <div>
+      <div>
+        <input
+          type="checkbox"
+          checked={images.size === selectedCount && images.size !== 0}
+          onChange={handleCheckChangeAll} />
+      </div>
+      <div>File Name</div>
+      <div>Original Size</div>
+      <div>Current Size</div>
+      <div>Saved</div>
+    </div>
+  ), [selectedCount, handleCheckChangeAll, images.size])
+
+  return useMemo(() => {
+    const imageListItems = Array.from(images, ([key, value]) => (
+      <ImageListItem
+        key={key}
+        filePath={key}
+        image={value}
+        onCheckChange={handleCheckChange}/>
+    ))
+
+    return (
+      <List>
+        { imageListHeader }
+        { imageListItems }
+      </List>
+    )
+  }, [images, handleCheckChange, imageListHeader])
 }
 
-export default ImageList
+export default memo(ImageList)
