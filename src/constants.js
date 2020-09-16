@@ -16,6 +16,7 @@ module.exports.imageStatus = Object.freeze({
 })
 
 module.exports.ICON_PATH = path.join(__dirname, '../public/icon.png')
+module.exports.APP_NAME = 'Image Panda'
 module.exports.READY_TO_COMPRESS = 'READY_TO_COMPRESS'
 module.exports.COMPRESSION_START = 'COMPRESSION_START'
 module.exports.COMPRESSION_STATUS = 'COMPRESSION_STATUS'
