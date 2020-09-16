@@ -2,6 +2,7 @@
   "name": "image-panda",
   "productName": "Image Panda",
   "version": "0.1.0",
+  "private": true,
   "description": "Cross-platform image compression tool, provides offline & tinyPNG compression",
   "main": "src/main.js",
   "keywords": [
