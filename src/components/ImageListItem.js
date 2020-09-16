@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, memo } from 'react'
 import filesize from 'filesize'
 import { imageStatus } from '../constants'
 
@@ -58,4 +58,4 @@ const ImageListItem = ({ filePath, image, onCheckChange }) => {
   )
 }
 
-export default React.memo(ImageListItem)
+export default memo(ImageListItem)
