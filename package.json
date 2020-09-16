@@ -1,8 +1,26 @@
 {
   "name": "image-panda",
+  "productName": "Image Panda",
   "version": "0.1.0",
-  "private": true,
+  "description": "Cross-platform image compression tool, provides offline & tinyPNG compression",
   "main": "src/main.js",
+  "keywords": [
+    "cross-platform",
+    "windows",
+    "mac",
+    "compression",
+    "tinify",
+    "tinyPNG",
+    "image panda",
+    "images",
+    "tool"
+  ],
+  "author": "Javed Ahmadzai <theahmadzai@hotmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theahmadzai/image-panda"
+  },
   "dependencies": {
     "@emotion/core": "^10.0.35",
     "@emotion/styled": "^10.0.27",
