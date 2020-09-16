@@ -23,8 +23,8 @@ const imagesReducer = (state = new Map(), { type, payload }) => {
       }]])
 
     case imageActionType.CHECK_CHANGE_ALL:
-      state.forEach(image => {
-        image.selected = payload
+      state.forEach((image, filePath) => {
+        state.set(filePath, { ...image, selected: payload })
       })
       return new Map(state)
 
