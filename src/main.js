@@ -1,3 +1,8 @@
+require('update-electron-app')({
+  repo: 'theahmadzai/image-panda',
+  updateInterval: '1 hour'
+  // logger: require('electron-log')
+})
 const { BrowserWindow, Menu, app, ipcMain, dialog } = require('electron')
 const path = require('path')
 const fs = require('fs')
