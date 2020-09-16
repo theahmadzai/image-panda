@@ -1,6 +1,10 @@
 const fs = require('fs')
 const path = require('path')
 const { ipcRenderer, contextBridge, shell } = require('electron')
+const {
+  GET_IMAGES_FROM_USER,
+  GET_DIRECTORY_FROM_USER
+} = require('../constants')
 
 const readApiKey = () => {
   try {
@@ -17,10 +21,10 @@ const openTinyPngApiDocs = () => {
 }
 
 const getImagesFromUser = async () => {
-  return await ipcRenderer.invoke('GET_IMAGES_FROM_USER')
+  return await ipcRenderer.invoke(GET_IMAGES_FROM_USER)
 }
 const getDirectoryFromUser = async () => {
-  return await ipcRenderer.invoke('GET_DIRECTORY_FROM_USER')
+  return await ipcRenderer.invoke(GET_DIRECTORY_FROM_USER)
 }
 
 const ipc = {

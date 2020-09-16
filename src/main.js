@@ -11,7 +11,9 @@ const {
   ICON_PATH,
   COMPRESSION_START,
   COMPRESSION_STATUS,
-  COMPRESSION_COUNT
+  COMPRESSION_COUNT,
+  GET_IMAGES_FROM_USER,
+  GET_DIRECTORY_FROM_USER
 } = require('./constants')
 
 const eventList = [
@@ -59,9 +61,9 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-ipcMain.handle('GET_IMAGES_FROM_USER', getImagesFromUser)
+ipcMain.handle(GET_IMAGES_FROM_USER, getImagesFromUser)
 
-ipcMain.handle('GET_DIRECTORY_FROM_USER', getDirectoryFromUser)
+ipcMain.handle(GET_DIRECTORY_FROM_USER, getDirectoryFromUser)
 
 ipcMain.on(COMPRESSION_START, (e, { filePaths, app: { useTinify, apiKey, outputPath } }) => {
   if (filePaths.length <= 0) {
