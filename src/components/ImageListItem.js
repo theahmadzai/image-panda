@@ -2,60 +2,57 @@ import React, { Fragment, memo } from 'react'
 import filesize from 'filesize'
 import { imageStatus } from '../constants'
 
-const ImageListItem = ({ filePath, image, onCheckChange }) => {
-  const { selected, status, meta } = image
-
-  let row = null
-
+const getRowColumns = ({ status, meta }) => {
   switch (status) {
-    case imageStatus.COMPRESSING:
-      row = (
-        <Fragment>
-          <div>{filesize(meta.originalSize)}</div>
-          <div>COMPRESSING</div>
-        </Fragment>
-      )
-      break
-
     case imageStatus.COMPRESSED:
-      meta.savedSize = meta.originalSize - meta.currentSize
-      meta.savedPercentage = Math.ceil(((meta.currentSize / meta.originalSize) * 100) - 100)
-      row = (
+      return (
         <Fragment>
-          <div>{filesize(meta.originalSize)}</div>
+          <div style={{ textDecoration: 'line-through' }}>{filesize(meta.originalSize)}</div>
           <div>{filesize(meta.currentSize)}</div>
-          <div>{filesize(meta.savedSize)} ({meta.savedPercentage}%)</div>
+          <div style={{ color: 'green' }}>
+            {filesize(meta.originalSize - meta.currentSize)}&nbsp;
+            ({Math.ceil(((meta.currentSize / meta.originalSize) * 100) - 100)}%)
+          </div>
         </Fragment>
       )
-      break
+
+    case imageStatus.COMPRESSING:
+      return (
+        <Fragment>
+          <div>{filesize(meta.originalSize)}</div>
+          <div>Compressing...</div>
+          <div></div>
+        </Fragment>
+      )
 
     case imageStatus.FAILED:
-      row = (
+      return (
         <Fragment>
-          <div>FAILED</div>
-          <div>{meta.error}</div>
+          <div style={{ color: 'red' }}>{meta.error}</div>
         </Fragment>
       )
-      break
 
     default:
-      row = (
-        <div>READY</div>
+      return (
+        <Fragment>
+          <div></div>
+          <div style={{ color: 'yellowgreen' }}>READY</div>
+        </Fragment>
       )
   }
-
-  return (
-    <div>
-      <div>
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={onCheckChange.bind(null, filePath)} />
-      </div>
-      <div>{filePath.substring(filePath.lastIndexOf('\\') + 1)}</div>
-      {row}
-    </div>
-  )
 }
+
+const ImageListItem = ({ filePath, image, onCheckChange }) => (
+  <div>
+    <div>
+      <input
+        type="checkbox"
+        checked={image.selected}
+        onChange={onCheckChange.bind(null, filePath)} />
+    </div>
+    <div>{filePath.substring(filePath.lastIndexOf('\\') + 1)}</div>
+    {getRowColumns(image)}
+  </div>
+)
 
 export default memo(ImageListItem)
