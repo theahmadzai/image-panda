@@ -50,7 +50,13 @@ const ImageListItem = ({ filePath, image, onCheckChange }) => (
         checked={image.selected}
         onChange={onCheckChange.bind(null, filePath)} />
     </div>
-    <div>{filePath.substring(filePath.lastIndexOf('\\') + 1)}</div>
+    <div style={{
+      overflow: 'hidden',
+      width: '320px',
+      display: 'block',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis'
+    }}>{filePath.substring(filePath.lastIndexOf('\\') + 1)}</div>
     {getRowColumns(image)}
   </div>
 )
