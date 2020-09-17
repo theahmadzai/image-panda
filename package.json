@@ -20,7 +20,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/theahmadzai/image-panda"
+    "url": "git+https://github.com/theahmadzai/image-panda.git"
   },
   "dependencies": {
     "@emotion/core": "^10.0.35",
