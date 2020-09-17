@@ -10,7 +10,7 @@ const Compressor = require('./Compressor')
 const { imageStatus } = require('../constants')
 
 const imageminPlugins = [
-  imageminJpegtran(),
+  imageminJpegtran({ progressive: true }),
   imageminPngquant({ quality: [0.5, 0.8] }),
   imageminGifsicle({ optimizationLevel: 2 }),
   imageminSvgo()
