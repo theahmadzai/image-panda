@@ -1,20 +1,8 @@
-const fs = require('fs')
-const path = require('path')
 const { ipcRenderer, contextBridge, shell } = require('electron')
 const {
   GET_IMAGES_FROM_USER,
   GET_DIRECTORY_FROM_USER
 } = require('../constants')
-
-const readApiKey = () => {
-  try {
-    return fs.readFileSync(path.resolve(__dirname, '../../.key'))
-      .toString()
-      .trim()
-  } catch (err) {
-    // ignore
-  }
-}
 
 const openTinyPngApiDocs = () => {
   shell.openExternal('https://tinypng.com/developers')
@@ -33,9 +21,6 @@ const ipc = {
 }
 
 contextBridge.exposeInMainWorld('electron', {
-  tinify: {
-    apiKey: readApiKey()
-  },
   openTinyPngApiDocs,
   dialog: {
     getImagesFromUser,
