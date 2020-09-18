@@ -27,7 +27,7 @@ const TinyfyBar = () => {
   const { useTinify, apiKey, compressionCount } = app
 
   useEffect(() => {
-    const apiKey = window.electron.tinify.apiKey
+    const apiKey = localStorage.getItem('apiKey')
 
     if (apiKey && apiKey.length) {
       setApp(state => ({
