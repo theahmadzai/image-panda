@@ -46,6 +46,10 @@ const App = () => {
       .filter(([, { status }]) => status === READY_TO_COMPRESS || status === imageStatus.FAILED)
       .map(([key]) => key)
 
+    if ('apiKye' in app && app.apiKey) {
+      localStorage.setItem('apiKey', app.apiKey)
+    }
+
     window.electron.ipc.send(COMPRESSION_START, { filePaths, app })
   }
 
