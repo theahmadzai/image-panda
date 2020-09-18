@@ -1,5 +1,6 @@
 const { shell } = require('electron')
 const isDev = require('electron-is-dev')
+const updater = require('./updater')
 const { APP_NAME } = require('../constants')
 
 const isMac = process.platform === 'darwin'
@@ -48,7 +49,9 @@ const menu = [
       { label: 'Report Issue', click: async () => await shell.openExternal('https://github.com/theahmadzai/image-panda/issues') },
       { label: 'Suggest Feature', click: async () => await shell.openExternal('https://github.com/theahmadzai/image-panda/issues') },
       { type: 'separator' },
-      { role: 'about' }
+      { role: 'about' },
+      { type: 'separator' },
+      { label: 'Check for updates', type: 'checkbox', checked: true, click: (e) => updater(e.checked) }
     ]
   }
 ]
