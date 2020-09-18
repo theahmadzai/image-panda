@@ -48,7 +48,7 @@ const menu = [
       { label: 'Report Issue', click: async () => await shell.openExternal('https://github.com/theahmadzai/image-panda/issues') },
       { label: 'Suggest Feature', click: async () => await shell.openExternal('https://github.com/theahmadzai/image-panda/issues') },
       { type: 'separator' },
-      { label: 'Check for updates' }
+      { role: 'about' }
     ]
   }
 ]
