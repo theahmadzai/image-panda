@@ -24,6 +24,10 @@ const eventList = [
   COMPRESSION_COUNT
 ]
 
+if (require('electron-squirrel-startup')) {
+  app.quit()
+}
+
 Sentry.init({ dsn: 'https://bdbb83d8ca1c4fab9bdb7d92eada13b2@o449876.ingest.sentry.io/5433630' })
 
 let mainWindow
