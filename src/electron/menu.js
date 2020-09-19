@@ -1,5 +1,6 @@
 const { shell } = require('electron')
 const isDev = require('electron-is-dev')
+const storage = require('./storage')
 const updater = require('./updater')
 const { APP_NAME } = require('../constants')
 
@@ -51,7 +52,15 @@ const menu = [
       { type: 'separator' },
       { role: 'about' },
       { type: 'separator' },
-      { label: 'Check for updates', type: 'checkbox', checked: true, click: (e) => updater(e.checked) }
+      {
+        label: 'Check for updates',
+        type: 'checkbox',
+        checked: storage.get('checkForUpdates', true),
+        click: (e) => {
+          updater(e.checked)
+          storage.set('checkForUpdates', e.checked)
+        }
+      }
     ]
   }
 ]
