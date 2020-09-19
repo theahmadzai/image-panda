@@ -50,9 +50,8 @@ const createWindow = () => {
     Menu.buildFromTemplate(menu)
   )
 
-  mainWindow.loadURL(isDev
-    ? 'http://127.0.0.1:3000'
-    : `file://${path.join(__dirname, '../build/index.html')}`)
+  if (isDev) mainWindow.loadURL('http://127.0.0.1:3000')
+  else mainWindow.loadFile(path.join(__dirname, '../build/index.html'))
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
