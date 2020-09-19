@@ -4,6 +4,7 @@ const fs = require('fs')
 const { promisify } = require('util')
 const isDev = require('electron-is-dev')
 const Sentry = require('@sentry/electron')
+const storage = require('./electron/storage')
 const logger = require('./electron/logger')
 const updater = require('./electron/updater')
 const menu = require('./electron/menu')
@@ -57,14 +58,15 @@ const createWindow = () => {
   if (isDev) mainWindow.loadURL('http://127.0.0.1:3000')
   else mainWindow.loadFile(path.join(__dirname, '../build/index.html'))
 
-  logger.log('main: version = ', app.getVersion())
+  logger.log('main: version =', app.getVersion())
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
   })
 
-  // TODO PRESIST
-  updater()
+  const checkForUpdates = storage.get('checkForUpdates', true)
+  updater(checkForUpdates)
+  logger.log('main: checkForUpdates =', checkForUpdates)
 }
 
 app.whenReady().then(createWindow)
@@ -82,7 +84,8 @@ ipcMain.handle(GET_IMAGES_FROM_USER, getImagesFromUser)
 ipcMain.handle(GET_DIRECTORY_FROM_USER, getDirectoryFromUser)
 
 ipcMain.on(COMPRESSION_START, async (e, { filePaths = [], app: { useTinify, apiKey, outputPath } }) => {
-  logger.log('main: compression started on', filePaths.length, ' with: ', app)
+  logger.log('main: compression started on', filePaths.length, 'image(s)')
+  logger.log('main: compression options: ', { useTinify, apiKey, outputPath })
 
   if (filePaths.length <= 0) {
     dialog.showErrorBox(
@@ -112,10 +115,10 @@ ipcMain.on(COMPRESSION_START, async (e, { filePaths = [], app: { useTinify, apiK
 
 const selectCompressor = (useTinify = false, apiKey, filePaths = [], dest) => {
   if (useTinify) {
-    logger.log('main: using tinify compessor')
+    logger.log('main: using tinify compessor ->', dest)
     return new TinifyCompressor(apiKey, filePaths, dest)
   }
 
-  logger.log('using offline compressor')
+  logger.log('main: using offline compressor ->', dest)
   return new OfflineCompressor(filePaths, dest)
 }
