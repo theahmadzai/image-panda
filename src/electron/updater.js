@@ -33,7 +33,7 @@ const updater = (checkForUpdates = true) => {
 
   const url = `${server}/${repo}/${process.platform}-${process.arch}/${app.getVersion()}`
 
-  logger.log('updater: url = ', url)
+  logger.log('updater: url =', url)
   autoUpdater.setFeedURL({ url })
 
   autoUpdater.on('error', err => {
