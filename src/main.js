@@ -1,8 +1,10 @@
 const { BrowserWindow, Menu, app, ipcMain, dialog } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const { promisify } = require('util')
 const isDev = require('electron-is-dev')
 const Sentry = require('@sentry/electron')
+const logger = require('./electron/logger')
 const updater = require('./electron/updater')
 const menu = require('./electron/menu')
 const { getImagesFromUser, getDirectoryFromUser } = require('./electron/dialogs.js')
@@ -17,6 +19,8 @@ const {
   GET_IMAGES_FROM_USER,
   GET_DIRECTORY_FROM_USER
 } = require('./constants')
+
+logger.log('main: starting app')
 
 const eventList = [
   ...Object.values(imageStatus),
@@ -53,10 +57,13 @@ const createWindow = () => {
   if (isDev) mainWindow.loadURL('http://127.0.0.1:3000')
   else mainWindow.loadFile(path.join(__dirname, '../build/index.html'))
 
+  logger.log('main: version = ', app.getVersion())
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
   })
 
+  // TODO PRESIST
   updater()
 }
 
@@ -74,7 +81,9 @@ ipcMain.handle(GET_IMAGES_FROM_USER, getImagesFromUser)
 
 ipcMain.handle(GET_DIRECTORY_FROM_USER, getDirectoryFromUser)
 
-ipcMain.on(COMPRESSION_START, (e, { filePaths, app: { useTinify, apiKey, outputPath } }) => {
+ipcMain.on(COMPRESSION_START, async (e, { filePaths = [], app: { useTinify, apiKey, outputPath } }) => {
+  logger.log('main: compression started on', filePaths.length, ' with: ', app)
+
   if (filePaths.length <= 0) {
     dialog.showErrorBox(
       'No files to compress',
@@ -83,25 +92,30 @@ ipcMain.on(COMPRESSION_START, (e, { filePaths, app: { useTinify, apiKey, outputP
     return
   }
 
-  fs.access(outputPath, fs.constants.F_OK, err => {
-    if (err) {
-      dialog.showErrorBox(
-        'Invalid output directory',
-        'Output directory does not exist or is not readable.'
-      )
-      return
-    }
+  try {
+    await promisify(fs.access)(outputPath, fs.constants.F_OK)
 
     const compressor = selectCompressor(useTinify, apiKey, filePaths, outputPath)
     compressor.forwardEventsToWindow(eventList, mainWindow)
     compressor.compress()
-  })
+
+    logger.log('main: compressing images')
+  } catch (err) {
+    logger.log('main: ', err)
+
+    dialog.showErrorBox(
+      'Invalid output directory',
+      'Output directory does not exist or is not readable.'
+    )
+  }
 })
 
-const selectCompressor = (useTinify, apiKey, filePaths = [], dest) => {
+const selectCompressor = (useTinify = false, apiKey, filePaths = [], dest) => {
   if (useTinify) {
+    logger.log('main: using tinify compessor')
     return new TinifyCompressor(apiKey, filePaths, dest)
   }
 
+  logger.log('using offline compressor')
   return new OfflineCompressor(filePaths, dest)
 }
