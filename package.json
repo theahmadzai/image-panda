@@ -46,6 +46,7 @@
     "electron": "^9.3.1",
     "electron-builder": "^22.8.1",
     "electron-is-dev": "^1.2.0",
+    "electron-packager": "^15.1.0",
     "eslint": "^6.6.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-better-styled-components": "^1.1.2",
@@ -70,7 +71,11 @@
     "lint:scripts": "eslint src",
     "format:scripts": "eslint src --fix",
     "electron-start": "electron .",
-    "electron-dev": "concurrently \"npm run start\" \"wait-on http://127.0.0.1:3000 && electron .\""
+    "electron-dev": "concurrently \"npm run start\" \"wait-on http://127.0.0.1:3000 && electron .\"",
+    "package": "npm run build-mac && npm run build-win && npm run build-linux",
+    "build-mac": "electron-packager . --platform=darwin --out=build --icon=./icons/icon-500.png --asar --overwrite",
+    "build-win": "electron-packager . --platform=win32 --out=build --icon=./icons/icon.png --asar --overwrite",
+    "build-linux": "electron-packager . --platform=linux --out=build --icon=./icons/icon.png --asar --overwrite"
   },
   "browserslist": {
     "production": [
