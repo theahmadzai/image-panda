@@ -104,26 +104,27 @@ ipcMain.on(
     }
 
     try {
+      logger.log('main: checking write access: ', outputPath)
       await promisify(fs.access)(outputPath, fs.constants.F_OK)
-
-      const compressor = selectCompressor(
-        useTinify,
-        apiKey,
-        filePaths,
-        outputPath
-      )
-      compressor.forwardEventsToWindow(eventList, mainWindow)
-      compressor.compress()
-
-      logger.log('main: compressing images')
     } catch (err) {
       logger.log('main: ', err)
-
       dialog.showErrorBox(
         'Invalid output directory',
         'Output directory does not exist or is not readable.'
       )
     }
+
+    logger.log('main: selecting compressor')
+    const compressor = selectCompressor(
+      useTinify,
+      apiKey,
+      filePaths,
+      outputPath
+    )
+    compressor.forwardEventsToWindow(eventList, mainWindow)
+
+    logger.log('main: compressing')
+    compressor.compress()
   }
 )
 
