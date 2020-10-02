@@ -4,31 +4,28 @@ const inputPathOptions = {
   filters: [
     {
       name: 'Images',
-      extensions: ['jpg', 'png', 'gpeg', 'gif', 'svg']
-    }
+      extensions: ['jpg', 'png', 'gpeg', 'gif', 'svg'],
+    },
   ],
-  properties: ['multiSelections']
+  properties: ['multiSelections'],
 }
 
 const outputPathOptions = {
-  properties: ['openDirectory']
+  properties: ['openDirectory'],
 }
 
 const openDialog = options => {
-  return dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), options)
+  return dialog
+    .showOpenDialog(BrowserWindow.getFocusedWindow(), options)
     .then(({ canceled, filePaths }) => {
-      return (!canceled && filePaths.length) && filePaths
+      return !canceled && filePaths.length && filePaths
     })
 }
 
 const getImagesFromUser = () => {
-  return openDialog(inputPathOptions)
-    .catch(() => {
-      dialog.showErrorBox(
-        'Error opening files',
-        'Failed to open image file.'
-      )
-    })
+  return openDialog(inputPathOptions).catch(() => {
+    dialog.showErrorBox('Error opening files', 'Failed to open image file.')
+  })
 }
 
 const getDirectoryFromUser = () => {
@@ -44,5 +41,5 @@ const getDirectoryFromUser = () => {
 
 module.exports = {
   getImagesFromUser,
-  getDirectoryFromUser
+  getDirectoryFromUser,
 }

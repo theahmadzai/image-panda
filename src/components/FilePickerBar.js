@@ -21,8 +21,11 @@ const FilePickerBar = () => {
 
   useEffect(() => {
     setApp(state => {
-      const inputPath = images.size === 0 ? ''
-        : images.size === 1 ? images.keys().next().value
+      const inputPath =
+        images.size === 0
+          ? ''
+          : images.size === 1
+          ? images.keys().next().value
           : `${images.size} images selected`
 
       return { ...state, inputPath }
@@ -32,10 +35,11 @@ const FilePickerBar = () => {
   const handleInputPicker = async () => {
     const filePaths = await window.electron.dialog.getImagesFromUser()
 
-    filePaths && dispatchImages({
-      type: imageActionType.SET,
-      payload: filePathsToImages(filePaths)
-    })
+    filePaths &&
+      dispatchImages({
+        type: imageActionType.SET,
+        payload: filePathsToImages(filePaths),
+      })
   }
 
   const handleOutputPicker = async () => {
@@ -47,17 +51,19 @@ const FilePickerBar = () => {
   return (
     <Grid>
       <FilePicker
-        label='Input Files'
-        placeholder='No images selected'
+        label="Input Files"
+        placeholder="No images selected"
         disabled={compressing}
         value={inputPath}
-        onClick={handleInputPicker} />
+        onClick={handleInputPicker}
+      />
       <FilePicker
-        label='Output Directory'
-        placeholder='Select folder...'
+        label="Output Directory"
+        placeholder="Select folder..."
         disabled={compressing}
         value={outputPath}
-        onClick={handleOutputPicker} />
+        onClick={handleOutputPicker}
+      />
     </Grid>
   )
 }

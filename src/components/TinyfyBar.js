@@ -8,7 +8,8 @@ import { COMPRESSION_COUNT } from '../constants'
 const Grid = styled.div`
   ${baseGrid}
 
-  grid-template-columns: auto ${props => props.count && 'max-content'} max-content;
+  grid-template-columns: auto ${props =>
+    props.count && 'max-content'} max-content;
 `
 
 const Checkbox = styled.div`
@@ -33,7 +34,7 @@ const TinyfyBar = () => {
       setApp(state => ({
         ...state,
         apiKey,
-        useTinify: true
+        useTinify: true,
       }))
     }
 
@@ -65,14 +66,21 @@ const TinyfyBar = () => {
         value={apiKey}
         onChange={handleKeyChange}
         disabled={!useTinify}
-        placeholder="Enter your API Key here" />
-      {useTinify && <Compressions>Compression count: <i>{compressionCount || 'Unkown'}</i></Compressions>}
+        placeholder="Enter your API Key here"
+      />
+      {useTinify && (
+        <Compressions>
+          Compression count: <i>{compressionCount || 'Unkown'}</i>
+        </Compressions>
+      )}
       <Checkbox>
-        <label>TinyPNG</label>
+        <label htmlFor="tinify">TinyPNG</label>
         <input
+          id="tinify"
           type="checkbox"
           checked={useTinify}
-          onChange={handleCheckChange} />
+          onChange={handleCheckChange}
+        />
       </Checkbox>
     </Grid>
   )

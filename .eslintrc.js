@@ -1,40 +1,33 @@
 module.exports = {
   env: {
     browser: true,
-    es6: true,
-    node: true
+    es2021: true,
+    node: true,
   },
   extends: [
+    'eslint:recommended',
+    'plugin:import/errors',
     'plugin:react/recommended',
-    'standard'
+    'plugin:react-hooks/recommended',
+    'plugin:jsx-a11y/recommended',
+    'prettier',
+    'prettier/react',
   ],
-  globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly'
-  },
   parserOptions: {
     ecmaFeatures: {
-      jsx: true
+      jsx: true,
     },
-    ecmaVersion: 2018,
-    sourceType: 'module'
+    ecmaVersion: 12,
+    sourceType: 'module',
   },
-  plugins: [
-    'react',
-    'react-hooks',
-    'better-styled-components'
-  ],
+  plugins: ['import', 'react', 'react-hooks', 'jsx-a11y'],
   settings: {
     react: {
-      version: 'detect'
-    }
+      version: 'detect',
+    },
   },
-  rules: {
-    'no-console': 1,
-    'comma-dangle': 1,
-    'react/prop-types': 0,
-    'react-hooks/rules-of-hooks': 2,
-    'react-hooks/exhaustive-deps': 1,
-    'better-styled-components/sort-declarations-alphabetically': 2
-  }
+  globals: {
+    MAIN_WINDOW_WEBPACK_ENTRY: true,
+  },
+  rules: { 'react/prop-types': 0, 'react/display-name': 0 },
 }

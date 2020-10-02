@@ -1,7 +1,7 @@
 const { autoUpdater, app, dialog } = require('electron')
 const isDev = require('electron-is-dev')
 const logger = require('./logger')
-const { APP_NAME } = require('../constants')
+const { APP_NAME } = require('../constants/common')
 
 const server = 'https://update.electronjs.org'
 const repo = 'theahmadzai/image-panda'
@@ -17,9 +17,14 @@ const updater = (checkForUpdates = true) => {
     return
   }
 
-  if (typeof process !== 'undefined' && process.platform &&
-    !(['darwin', 'win32'].includes(process.platform))) {
-    logger.log(`updater: electron's autoUpdater does not support the ${process.platform} platform`)
+  if (
+    typeof process !== 'undefined' &&
+    process.platform &&
+    !['darwin', 'win32'].includes(process.platform)
+  ) {
+    logger.log(
+      `updater: electron's autoUpdater does not support the ${process.platform} platform`
+    )
     return
   }
 
@@ -31,7 +36,9 @@ const updater = (checkForUpdates = true) => {
     return
   }
 
-  const url = `${server}/${repo}/${process.platform}-${process.arch}/${app.getVersion()}`
+  const url = `${server}/${repo}/${process.platform}-${
+    process.arch
+  }/${app.getVersion()}`
 
   logger.log('updater: url =', url)
   autoUpdater.setFeedURL({ url })
@@ -64,7 +71,7 @@ const updater = (checkForUpdates = true) => {
       buttons: ['Restart', 'Later'],
       title: `${APP_NAME} Update`,
       message: process.platform === 'win32' ? releaseNotes : releaseName,
-      detail: `A new version of ${APP_NAME} has been downloaded. Restart the application to apply the updates.`
+      detail: `A new version of ${APP_NAME} has been downloaded. Restart the application to apply the updates.`,
     }
 
     dialog.showMessageBox(dialogOpts).then(({ response }) => {

@@ -13,7 +13,7 @@ import {
   imageStatus,
   READY_TO_COMPRESS,
   COMPRESSION_START,
-  COMPRESSION_STATUS
+  COMPRESSION_STATUS,
 } from '../constants'
 
 const App = () => {
@@ -29,21 +29,25 @@ const App = () => {
   const handleAddMore = async () => {
     const filePaths = await window.electron.dialog.getImagesFromUser()
 
-    filePaths && dispatchImages({
-      type: imageActionType.ADD,
-      payload: filePathsToImages(filePaths)
-    })
+    filePaths &&
+      dispatchImages({
+        type: imageActionType.ADD,
+        payload: filePathsToImages(filePaths),
+      })
   }
 
   const handleRemoveSlected = () => {
     dispatchImages({
-      type: imageActionType.REMOVE_SELECTED
+      type: imageActionType.REMOVE_SELECTED,
     })
   }
 
   const handleCompress = () => {
     const filePaths = Array.from(images)
-      .filter(([, { status }]) => status === READY_TO_COMPRESS || status === imageStatus.FAILED)
+      .filter(
+        ([, { status }]) =>
+          status === READY_TO_COMPRESS || status === imageStatus.FAILED
+      )
       .map(([key]) => key)
 
     if ('apiKye' in app && app.apiKey) {
@@ -57,14 +61,20 @@ const App = () => {
 
   return (
     <div className="App">
-      <Global styles={globalStyles}/>
+      <Global styles={globalStyles} />
       <FilePickerBar />
-      <TinyfyBar/>
+      <TinyfyBar />
       <ImageList />
       <Stack>
-        <Button onClick={handleAddMore} disabled={compressing}>Add more</Button>
-        <Button onClick={handleRemoveSlected} disabled={compressing}>Remove selected</Button>
-        <Button onClick={handleCompress} disabled={compressing}>Compress images</Button>
+        <Button onClick={handleAddMore} disabled={compressing}>
+          Add more
+        </Button>
+        <Button onClick={handleRemoveSlected} disabled={compressing}>
+          Remove selected
+        </Button>
+        <Button onClick={handleCompress} disabled={compressing}>
+          Compress images
+        </Button>
       </Stack>
     </div>
   )

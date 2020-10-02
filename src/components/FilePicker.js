@@ -13,10 +13,7 @@ const FilePicker = props => {
   return (
     <div>
       <Label>{label}</Label>
-      <Input
-        {...inputProps}
-        type="text"
-        readOnly />
+      <Input {...inputProps} type="text" readOnly />
     </div>
   )
 }

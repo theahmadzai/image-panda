@@ -45,48 +45,62 @@ const ImageList = () => {
   useEffect(() => {
     Object.values(imageStatus).forEach(status => {
       window.electron.ipc.on(status, (e, { filePath, ...meta }) => {
-        dispatchImages(({
+        dispatchImages({
           type: imageActionType.CHANGE_STATUS,
-          payload: { status, filePath, meta }
-        }))
+          payload: { status, filePath, meta },
+        })
       })
     })
   }, [dispatchImages])
 
-  const handleCheckChangeAll = useCallback(e => {
-    const { checked } = e.target
+  const handleCheckChangeAll = useCallback(
+    e => {
+      const { checked } = e.target
 
-    dispatchImages({
-      type: imageActionType.CHECK_CHANGE_ALL,
-      payload: checked
-    })
-  }, [dispatchImages])
+      dispatchImages({
+        type: imageActionType.CHECK_CHANGE_ALL,
+        payload: checked,
+      })
+    },
+    [dispatchImages]
+  )
 
-  const handleCheckChange = useCallback(key => {
-    dispatchImages({
-      type: imageActionType.CHECK_CHANGE,
-      payload: key
-    })
-  }, [dispatchImages])
+  const handleCheckChange = useCallback(
+    key => {
+      dispatchImages({
+        type: imageActionType.CHECK_CHANGE,
+        payload: key,
+      })
+    },
+    [dispatchImages]
+  )
 
-  const selectedCount = React.useMemo(() => Array.from(images).reduce((t, [, { selected }]) => {
-    return selected ? t + 1 : t
-  }, 0), [images])
+  const selectedCount = React.useMemo(
+    () =>
+      Array.from(images).reduce((t, [, { selected }]) => {
+        return selected ? t + 1 : t
+      }, 0),
+    [images]
+  )
 
-  const imageListHeader = useMemo(() => (
-    <div>
+  const imageListHeader = useMemo(
+    () => (
       <div>
-        <input
-          type="checkbox"
-          checked={images.size === selectedCount && images.size !== 0}
-          onChange={handleCheckChangeAll} />
+        <div>
+          <input
+            type="checkbox"
+            checked={images.size === selectedCount && images.size !== 0}
+            onChange={handleCheckChangeAll}
+          />
+        </div>
+        <div>File Name</div>
+        <div>Original Size</div>
+        <div>Current Size</div>
+        <div>Saved</div>
       </div>
-      <div>File Name</div>
-      <div>Original Size</div>
-      <div>Current Size</div>
-      <div>Saved</div>
-    </div>
-  ), [selectedCount, handleCheckChangeAll, images.size])
+    ),
+    [selectedCount, handleCheckChangeAll, images.size]
+  )
 
   return useMemo(() => {
     const imageListItems = Array.from(images, ([key, value]) => (
@@ -94,13 +108,14 @@ const ImageList = () => {
         key={key}
         filePath={key}
         image={value}
-        onCheckChange={handleCheckChange}/>
+        onCheckChange={handleCheckChange}
+      />
     ))
 
     return (
       <List>
-        { imageListHeader }
-        { imageListItems }
+        {imageListHeader}
+        {imageListItems}
       </List>
     )
   }, [images, handleCheckChange, imageListHeader])

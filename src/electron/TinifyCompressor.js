@@ -3,10 +3,10 @@ const path = require('path')
 const { promisify } = require('util')
 const tinify = require('tinify')
 const Compressor = require('./Compressor')
-const { imageStatus, COMPRESSION_COUNT } = require('../constants')
+const { imageStatus, COMPRESSION_COUNT } = require('../constants/common')
 
 class TinifyCompressor extends Compressor {
-  constructor (apiKey, filePaths = [], dest) {
+  constructor(apiKey, filePaths = [], dest) {
     super(filePaths, dest)
 
     tinify.key = apiKey
@@ -14,7 +14,7 @@ class TinifyCompressor extends Compressor {
     this.MAX_ALLOWED = 20
   }
 
-  static getErrorMessage (err) {
+  static getErrorMessage(err) {
     if (err instanceof tinify.AccountError) {
       return 'Verify your API key and account limit.'
     } else if (err instanceof tinify.ClientError) {
@@ -29,7 +29,7 @@ class TinifyCompressor extends Compressor {
     return 'Unable to read data from file.'
   }
 
-  async compressImage (filePath) {
+  async compressImage(filePath) {
     const meta = { filePath }
 
     try {

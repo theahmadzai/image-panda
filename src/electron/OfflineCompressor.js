@@ -2,28 +2,28 @@ const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
 const imagemin = require('imagemin')
-const imageminJpegtran = require('imagemin-jpegtran')
-const imageminPngquant = require('imagemin-pngquant')
-const imageminGifsicle = require('imagemin-gifsicle')
+// const imageminJpegtran = require('imagemin-jpegtran')
+// const imageminPngquant = require('imagemin-pngquant')
+// const imageminGifsicle = require('imagemin-gifsicle')
 const imageminSvgo = require('imagemin-svgo')
 const Compressor = require('./Compressor')
-const { imageStatus } = require('../constants')
+const { imageStatus } = require('../constants/common')
 
 const imageminPlugins = [
-  imageminJpegtran({ progressive: true }),
-  imageminPngquant({ quality: [0.5, 0.8] }),
-  imageminGifsicle({ optimizationLevel: 2 }),
-  imageminSvgo()
+  // imageminJpegtran({ progressive: true }),
+  // imageminPngquant({ quality: [0.5, 0.8] }),
+  // imageminGifsicle({ optimizationLevel: 2 }),
+  imageminSvgo(),
 ]
 
 class OfflineCompressor extends Compressor {
-  constructor (filePaths = [], dest) {
+  constructor(filePaths = [], dest) {
     super(filePaths, dest)
 
     this.MAX_ALLOWED = 4
   }
 
-  async compressImage (filePath) {
+  async compressImage(filePath) {
     const meta = { filePath }
 
     try {
@@ -34,7 +34,7 @@ class OfflineCompressor extends Compressor {
       this.emit(imageStatus.COMPRESSING, meta)
 
       const compressedImage = await imagemin.buffer(imageBuffer, {
-        plugins: imageminPlugins
+        plugins: imageminPlugins,
       })
       meta.currentSize = Buffer.byteLength(compressedImage)
 

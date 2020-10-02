@@ -6,7 +6,7 @@ const initialState = {
   compressing: false,
   useTinify: false,
   apiKey: '',
-  compressionCount: 0
+  compressionCount: 0,
 }
 
 export const AppContext = createContext()

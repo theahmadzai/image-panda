@@ -1,9 +1,9 @@
 const { eachLimit } = require('async')
 const WindowEventEmitter = require('./WindowEventEmitter')
-const { COMPRESSION_STATUS } = require('../constants')
+const { COMPRESSION_STATUS } = require('../constants/common')
 
 class Compressor extends WindowEventEmitter {
-  constructor (filePaths = [], dest) {
+  constructor(filePaths = [], dest) {
     super()
 
     this.MAX_ALLOWED = 10
@@ -13,7 +13,7 @@ class Compressor extends WindowEventEmitter {
     this.startTime = new Date()
   }
 
-  async compress () {
+  async compress() {
     this.emit(COMPRESSION_STATUS, true)
 
     await eachLimit(
@@ -27,7 +27,7 @@ class Compressor extends WindowEventEmitter {
     this.notify({
       imagesCompressed: this.filePaths.length,
       bytesSaved: Math.abs(this.bytesSaved),
-      timeTaken: new Date(new Date() - this.startTime)
+      timeTaken: new Date(new Date() - this.startTime),
     })
   }
 }
