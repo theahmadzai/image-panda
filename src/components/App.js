@@ -14,7 +14,7 @@ import {
   READY_TO_COMPRESS,
   COMPRESSION_START,
   COMPRESSION_STATUS,
-} from '../constants'
+} from '../constants/common'
 
 const App = () => {
   const { app, setApp } = useApp()

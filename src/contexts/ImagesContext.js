@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer } from 'react'
-import { imageActionType } from '../constants'
+import { imageActionType } from '../constants/common'
 
 const imagesReducer = (state = new Map(), { type, payload }) => {
   switch (type) {

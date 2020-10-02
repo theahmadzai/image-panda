@@ -1,6 +1,6 @@
 import React, { Fragment, memo } from 'react'
 import filesize from 'filesize'
-import { imageStatus } from '../constants'
+import { imageStatus } from '../constants/common'
 
 const getRowColumns = ({ status, meta }) => {
   switch (status) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useMemo, memo } from 'react'
 import styled from '@emotion/styled'
-import { imageActionType, imageStatus } from '../constants'
+import { imageActionType, imageStatus } from '../constants/common'
 import { useImages } from '../contexts/ImagesContext'
 import ImageListItem from './ImageListItem'
 

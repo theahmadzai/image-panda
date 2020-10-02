@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import { useApp } from '../contexts/AppContext'
 import { formControl, baseGrid } from '../styles'
 import { Input } from '../elements'
-import { COMPRESSION_COUNT } from '../constants'
+import { COMPRESSION_COUNT } from '../constants/common'
 
 const Grid = styled.div`
   ${baseGrid}

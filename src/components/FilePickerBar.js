@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import { baseGrid } from '../styles'
 import { AppContext } from '../contexts/AppContext'
 import { ImagesContext } from '../contexts/ImagesContext'
-import { imageActionType } from '../constants'
+import { imageActionType } from '../constants/common'
 import FilePicker from './FilePicker'
 import { filePathsToImages } from '../utils'
 

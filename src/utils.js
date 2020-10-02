@@ -1,4 +1,4 @@
-import { READY_TO_COMPRESS } from './constants'
+import { READY_TO_COMPRESS } from './constants/common'
 
 export const filePathsToImages = filePaths =>
   new Map(
