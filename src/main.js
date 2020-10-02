@@ -8,7 +8,7 @@ const logger = require('./electron/logger')
 const updater = require('./electron/updater')
 const menu = require('./electron/menu')
 const TinifyCompressor = require('./electron/TinifyCompressor')
-// const OfflineCompressor = require('./electron/OfflineCompressor')
+const OfflineCompressor = require('./electron/OfflineCompressor')
 const {
   getImagesFromUser,
   getDirectoryFromUser,
@@ -134,5 +134,5 @@ const selectCompressor = (useTinify = false, apiKey, filePaths = [], dest) => {
   }
 
   logger.log('main: using offline compressor ->', dest)
-  // return new OfflineCompressor(filePaths, dest)
+  return new OfflineCompressor(filePaths, dest)
 }

@@ -30,7 +30,7 @@ class TinifyCompressor extends Compressor {
   }
 
   async compressImage(filePath) {
-    const meta = { filePath }
+    const meta = { filePath, originalSize: 0, currentSize: 0 }
 
     try {
       const image = await promisify(fs.readFile)(filePath)

@@ -12,7 +12,7 @@ class WindowEventEmitter extends EventEmitter {
     })
   }
 
-  notify({ imagesCompressed, bytesSaved, timeTaken = new Date(0) }) {
+  notify({ imagesCompressed = 0, bytesSaved = 0, timeTaken = new Date(0) }) {
     const time =
       timeTaken.getMinutes() > 0
         ? `${timeTaken.getMinutes()}m ${timeTaken.getSeconds()}s`
