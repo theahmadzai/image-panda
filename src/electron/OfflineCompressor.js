@@ -15,7 +15,7 @@ const imageminPlugins = [
   // imageminGifsicle({ optimizationLevel: 2 }),
   // imageminSvgo(),
 ]
-console.log('hi')
+
 class OfflineCompressor extends Compressor {
   constructor(filePaths = [], dest) {
     super(filePaths, dest)
