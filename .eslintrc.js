@@ -3,6 +3,7 @@ module.exports = {
     browser: true,
     es2021: true,
     node: true,
+    jest: true,
   },
   extends: [
     'eslint:recommended',
@@ -10,6 +11,7 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
+    'plugin:jest/recommended',
     'prettier',
     'prettier/react',
   ],
@@ -20,9 +22,12 @@ module.exports = {
     ecmaVersion: 12,
     sourceType: 'module',
   },
-  plugins: ['import', 'react', 'react-hooks', 'jsx-a11y'],
+  plugins: ['import', 'react', 'react-hooks', 'jsx-a11y', 'jest'],
   settings: {
     react: {
+      version: 'detect',
+    },
+    jest: {
       version: 'detect',
     },
   },

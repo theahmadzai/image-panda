@@ -1,7 +1,7 @@
 {
   "name": "image-panda",
   "productName": "Image Panda",
-  "version": "0.1.0",
+  "version": "0.1.0-beta",
   "private": true,
   "description": "Cross-platform image compression tool, provides offline & tinyPNG compression",
   "main": ".webpack/main",
@@ -22,7 +22,8 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.{js,css,jsx,ts,tsx,json,md}\""
+    "format": "prettier --write \"**/*.{js,css,jsx,ts,tsx,json,md}\"",
+    "test": "jest"
   },
   "author": {
     "name": "Javed Ahmadzai",
@@ -96,11 +97,14 @@
     "eslint": "^7.10.0",
     "eslint-config-prettier": "^6.12.0",
     "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.0.2",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react": "^7.21.2",
     "eslint-plugin-react-hooks": "^4.1.2",
+    "jest": "^26.4.2",
     "node-loader": "^1.0.1",
     "prettier": "^2.1.2",
+    "spectron": "^12.0.0",
     "style-loader": "^1.2.1",
     "stylelint": "^13.7.2",
     "stylelint-config-prettier": "^8.0.2",
