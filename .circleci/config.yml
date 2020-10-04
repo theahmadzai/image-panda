@@ -29,4 +29,4 @@ jobs:
           command: npm run make
 
       - store_artifacts:
-          path: ~/image-panda/oute/make
+          path: ~/image-panda/out/make
