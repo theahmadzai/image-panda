@@ -1,5 +1,5 @@
 const fs = require('fs')
-const path = require('path')
+// const path = require('path')
 const { promisify } = require('util')
 // const imagemin = require('imagemin')
 // const imageminJpegtran = require('imagemin-jpegtran')
@@ -9,12 +9,12 @@ const { promisify } = require('util')
 const Compressor = require('./Compressor')
 const { imageStatus } = require('../constants/common')
 
-const imageminPlugins = [
-  // imageminJpegtran({ progressive: true }),
-  // imageminPngquant({ quality: [0.5, 0.8] }),
-  // imageminGifsicle({ optimizationLevel: 2 }),
-  // imageminSvgo(),
-]
+// const imageminPlugins = [
+//   imageminJpegtran({ progressive: true }),
+//   imageminPngquant({ quality: [0.5, 0.8] }),
+//   imageminGifsicle({ optimizationLevel: 2 }),
+//   imageminSvgo(),
+// ]
 
 class OfflineCompressor extends Compressor {
   constructor(filePaths = [], dest) {
@@ -34,13 +34,13 @@ class OfflineCompressor extends Compressor {
       this.emit(imageStatus.COMPRESSING, meta)
 
       // const compressedImage = await imagemin.buffer(imageBuffer, {
-      // plugins: imageminPlugins,
+      //   plugins: imageminPlugins,
       // })
       // meta.currentSize = Buffer.byteLength(compressedImage)
 
       // await promisify(fs.writeFile)(
-      // path.join(this.dest, path.basename(filePath)),
-      // compressedImage
+      //   path.join(this.dest, path.basename(filePath)),
+      //   compressedImage
       // )
 
       this.emit(imageStatus.COMPRESSED, meta)

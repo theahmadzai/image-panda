@@ -1,4 +1,5 @@
 const { ipcRenderer, contextBridge, shell } = require('electron')
+// https://github.com/electron-userland/electron-forge/issues/1988
 // const {
 //   GET_IMAGES_FROM_USER,
 //   GET_DIRECTORY_FROM_USER,
